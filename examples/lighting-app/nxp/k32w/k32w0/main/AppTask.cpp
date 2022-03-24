@@ -690,13 +690,6 @@ void AppTask::OTAResumeEventHandler(AppEvent * aEvent)
     }
 }
 
-extern "C" void vApplicationIdleHook(void)
-{
-#if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
-    OTA_TransactionResume();
-#endif
-}
-
 void AppTask::PostEvent(const AppEvent * aEvent)
 {
     if (sAppEventQueue != NULL)
