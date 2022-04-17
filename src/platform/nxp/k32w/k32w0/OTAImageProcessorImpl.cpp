@@ -319,4 +319,11 @@ void OTAImageProcessorImpl::HandleBlockEraseComplete(uint32_t)
     }
 }
 
+extern "C" void OTAIdleActivities( void )
+{
+#if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
+    OTA_TransactionResume();
+#endif
+}
+
 } // namespace chip
