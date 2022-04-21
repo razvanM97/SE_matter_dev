@@ -173,30 +173,34 @@ will be initiated.
 In order to build the Project CHIP example, we recommend using a Linux
 distribution (the demo-application was compiled on Ubuntu 20.04).
 
--   Download [K32W061 SDK 2.6.4 for Project CHIP](https://mcuxpresso.nxp.com/).
+-   Download [K32W0 SDK 2.6.4 for Project CHIP](https://mcuxpresso.nxp.com/).
     Creating an nxp.com account is required before being able to download the
     SDK. Once the account is created, login and follow the steps for downloading
-    SDK_2_6_4_K32W061DK6. The SDK Builder UI selection should be similar with
-    the one from the image below.
+    SDK_2_6_4_K32W061DK6 (required for K32W061 flavour).
+    The SDK Builder UI selection should be similar with the one from the image below.
     ![MCUXpresso SDK Download](../../../../platform/nxp/k32w/k32w0/doc/images/mcux-sdk-download.JPG)
 
--   Start building the application either with Secure Element or without
+-   Start building the application
     -   with Secure Element
 
 ```
-user@ubuntu:~/Desktop/git/connectedhomeip$ export NXP_K32W061_SDK_ROOT=/home/user/Desktop/SDK_2_6_4_K32W061DK6/
+user@ubuntu:~/Desktop/git/connectedhomeip$ export NXP_K32W0_SDK_ROOT=/home/user/Desktop/SDK_2_6_4_K32W061DK6/
 user@ubuntu:~/Desktop/git/connectedhomeip$ ./third_party/nxp/k32w0_sdk/sdk_fixes/patch_k32w_sdk.sh
 user@ubuntu:~/Desktop/git/connectedhomeip$ source ./scripts/activate.sh
 user@ubuntu:~/Desktop/git/connectedhomeip$ cd examples/lighting-app/nxp/k32w/k32w0
-user@ubuntu:~/Desktop/git/connectedhomeip/examples/lighting-app/nxp/k32w/k32w0$ gn gen out/debug --args="k32w0_sdk_root=\"${NXP_K32W061_SDK_ROOT}\" chip_with_OM15082=1 chip_with_ot_cli=0 is_debug=false chip_crypto=\"mbedtls\" chip_with_se05x=1"
+user@ubuntu:~/Desktop/git/connectedhomeip/examples/lighting-app/nxp/k32w/k32w0$ gn gen out/debug --args="k32w0_sdk_root=\"${NXP_K32W0_SDK_ROOT}\" chip_with_OM15082=1 chip_with_ot_cli=0 is_debug=false chip_crypto=\"mbedtls\" chip_with_se05x=1"
 user@ubuntu:~/Desktop/git/connectedhomeip/examples/lighting-app/nxp/k32w/k32w0$ ninja -C out/debug
-user@ubuntu:~/Desktop/git/connectedhomeip/examples/lighting-app/nxp/k32w/k32w0$ $NXP_K32W061_SDK_ROOT/tools/imagetool/sign_images.sh out/debug/
+user@ubuntu:~/Desktop/git/connectedhomeip/examples/lighting-app/nxp/k32w/k32w0$ $NXP_K32W0_SDK_ROOT/tools/imagetool/sign_images.sh out/debug/
 ```
 
     -   without Secure element
         Exactly the same steps as above but set chip_with_se05x=0 in the gn command
 
-Note that "patch_k32w_sdk.sh" script must be run for patching the K32W061 SDK
+    -   for K32W041AM flavour:
+        Exactly the same steps as above but set build_for_k32w041am=1 in the gn command.
+        Also, select the K32W041AM SDK from the SDK Builder.
+
+Note that "patch_k32w_sdk.sh" script must be run for patching the K32W0 SDK
 2.6.4.
 
 Also, in case the OM15082 Expansion Board is not attached to the DK6 board, the
@@ -220,7 +224,7 @@ pycrypto               2.6.1
 pycryptodome           3.9.8
 ```
 
-The resulting output file can be found in out/debug/chip-k32w061-light-example.
+The resulting output file can be found in out/debug/chip-k32w0x-light-example.
 
 <a name="flashdebug"></a>
 
@@ -230,8 +234,8 @@ Program the firmware using the official
 [OpenThread Flash Instructions](https://github.com/openthread/ot-nxp/tree/main/src/k32w0/k32w061#flash-binaries).
 
 All you have to do is to replace the Openthread binaries from the above
-documentation with _out/debug/chip-k32w061-light-example.bin_ if DK6Programmer
-is used or with _out/debug/chip-k32w061-light-example_ if MCUXpresso is used.
+documentation with _out/debug/chip-k32w0x-light-example.bin_ if DK6Programmer
+is used or with _out/debug/chip-k32w0x-light-example_ if MCUXpresso is used.
 
 <a name="tokenizer"></a>
 
@@ -263,7 +267,7 @@ the serial to decode from.
 
 The third parameter is _-d DATABASE_ and represents the path to the token
 database to be used for decoding. The default path is
-_out/debug/chip-k32w061-light-example-database.bin_ after a successful build.
+_out/debug/chip-k32w0x-light-example-database.bin_ after a successful build.
 
 The forth parameter is _-o OUTPUT_ and it represents the path to the output file
 where the decoded logs will be stored. This parameter is required for file usage
@@ -382,7 +386,7 @@ CD04     -> 0x4CD pages of 512-bytes (= 614,5kB)
 DK6Programmer can be used for flashing the application:
 
 ```
-DK6Programmer.exe -V2 -s <COM_PORT> -P 1000000 -Y -p FLASH@0x4000="chip-k32w061-light-example.bin"
+DK6Programmer.exe -V2 -s <COM_PORT> -P 1000000 -Y -p FLASH@0x4000="chip-k32w0x-light-example.bin"
 ```
 
 If debugging is needed, MCUXpresso can be used then for flashing the
@@ -437,9 +441,9 @@ doru@computer1:~/connectedhomeip$ : ./scripts/examples/gn_build_example.sh examp
 Build OTA image and start the OTA Provider Application:
 
 ```
-doru@computer1:~/connectedhomeip$ : ./src/app/ota_image_tool.py create -v 0xDEAD -p 0xBEEF -vn 1 -vs "1.0" -da sha256 chip-k32w061-light-example.bin chip-k32w061-light-example.ota
+doru@computer1:~/connectedhomeip$ : ./src/app/ota_image_tool.py create -v 0xDEAD -p 0xBEEF -vn 1 -vs "1.0" -da sha256 chip-k32w0x-light-example.bin chip-k32w0x-light-example.ota
 doru@computer1:~/connectedhomeip$ : rm -rf /tmp/chip_*
-doru@computer1:~/connectedhomeip$ : ./out/ota-provider-app/chip-ota-provider-app -f chip-k32w061-light-example.ota
+doru@computer1:~/connectedhomeip$ : ./out/ota-provider-app/chip-ota-provider-app -f chip-k32w0x-light-example.ota
 ```
 
 Build Linux chip-tool:

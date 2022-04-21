@@ -35,7 +35,7 @@ class K32WApp(Enum):
 
     def AppNamePrefix(self):
         if self == K32WApp.LIGHT:
-            return 'chip-k32w061-light-example'
+            return 'chip-k32w0x-light-example'
         elif self == K32WApp.LOCK:
             return 'chip-k32w061-lock-example'
         elif self == K32WApp.SHELL:
@@ -73,7 +73,7 @@ class K32WBuilder(GnBuilder):
 
     def GnBuildArgs(self):
         args = [
-            'k32w0_sdk_root="%s"' % os.environ['NXP_K32W061_SDK_ROOT'],
+            'k32w0_sdk_root="%s"' % os.environ['NXP_K32W0_SDK_ROOT'],
         ]
 
         if self.low_power:

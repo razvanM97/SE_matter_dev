@@ -75,6 +75,6 @@ ENV CY_TOOLS_PATHS="/opt/ModusToolbox/tools_2.4"
 ENV TIZEN_SDK_ROOT /opt/tizen-sdk
 ENV SYSROOT_AARCH64=/opt/ubuntu-21.04-aarch64-sysroot
 ENV AMEBA_PATH=/opt/ameba/ambd_sdk_with_chip_non_NDA
-ENV NXP_K32W061_SDK_ROOT=/opt/sdk/sdks
+ENV NXP_K32W0_SDK_ROOT=/opt/sdk/sdks
 ENV IMX_SDK_ROOT=/opt/fsl-imx-xwayland/5.10-hardknott/
 ENV TI_SYSCONFIG_ROOT=/opt/ti/sysconfig_1.11.0
