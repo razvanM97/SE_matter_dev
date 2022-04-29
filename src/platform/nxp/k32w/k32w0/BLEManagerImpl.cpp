@@ -245,6 +245,11 @@ bool BLEManagerImpl::_IsAdvertisingEnabled(void)
     return mFlags.Has(Flags::kAdvertisingEnabled);
 }
 
+bool BLEManagerImpl::_IsAdvertising(void)
+{
+    return mFlags.Has(Flags::kAdvertising);
+}
+
 bool BLEManagerImpl::RemoveConnection(uint8_t connectionHandle)
 {
     CHIPoBLEConState * bleConnState = GetConnectionState(connectionHandle, true);
