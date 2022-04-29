@@ -213,8 +213,9 @@ SECTIONS
 
     _etext = .;
 
-    .heap (COPY):
+    .heap_controller (COPY):
     {
+        *(.ll_exchange_mem)
         __HeapBase = .;
          _heap = .;
         KEEP(*(.heap*))
