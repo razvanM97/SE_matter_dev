@@ -27,9 +27,15 @@ network.
     -   [Detokenizer script](#detokenizer)
     -   [Notes](#detokenizer-notes)
     -   [Known issues](#detokenizer-known-issues)
--   [OTA](#ota) - [Writing the SSBL](#ssbl) - [Writing the PSECT](#psect) -
-    [Writing the application](#appwrite) - [OTA Testing](#otatesting) -
-    [Known issues](#otaissues)
+-   [OTA](#ota)
+    -    [Writing the SSBL](#ssbl)
+    -    [Writing the PSECT](#psect)
+    -    [Writing the application](#appwrite)
+    -    [OTA Testing](#otatesting)
+    -    [Known issues](#otaissues)
+-   [Tinycrypt ECC operations](#tinycrypt)
+    -    [Building steps](#tinycryptbuildingsteps)
+
     </hr>
 
 <a name="intro"></a>
@@ -497,3 +503,13 @@ doru@computer1:~/connectedhomeip$ sudo ifconfig eth0 -multicast
 
 -   If Wi-Fi is used on a RPI4, then a 5Ghz network should be selected.
     Otherwise, issues related to BLE-WiFi combo may appear.
+
+
+<a name="tinycrypt"></a>
+
+## Tinycrypt ECC operations
+
+<a name="tinycryptbuildingsteps"></a>
+### Building steps
+
+In order to use the tinycrypt ecc operations, just build the binary with the following gn build arguments: _chip_with_se05x=0_ (Secure Element disabled) and _mbedtls_use_tinycrypt=true_ (tinycrypt enabled).

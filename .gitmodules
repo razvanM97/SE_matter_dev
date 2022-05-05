@@ -16,8 +16,8 @@
 	branch  = master
 [submodule "mbedtls"]
 	path = third_party/mbedtls/repo
-	url = https://github.com/ARMmbed/mbedtls.git
-	branch  = mbedtls-2.25.0
+	url = https://github.com/NXPmicro/mbedtls.git
+	branch  = tinycrypt
 [submodule "qrcode"]
 	path = examples/common/QRCode/repo
 	url = https://github.com/nayuki/QR-Code-generator.git
