@@ -45,10 +45,10 @@ patch -N --binary -d "$NXP_K32W0_SDK_ROOT"/middleware/wireless/framework/MemMana
 
 SIGN_FILE_PATH="$NXP_K32W0_SDK_ROOT"/tools/imagetool/sign_images.sh
 convert_to_dos "$SIGN_FILE_PATH"
-patch -N --binary -d "$third_party/nxp/k32w0_sdk/sdk_fixes/patch_k32w_sdk.sh"/tools/imagetool/ -p1 <"$SOURCE_DIR/sign_images_sh.patch"
+patch -N --binary -d "$NXP_K32W0_SDK_ROOT"/tools/imagetool/ -p1 <"$SOURCE_DIR/sign_images_sh.patch"
 sed -i 's/\r$//' "$SIGN_FILE_PATH"
 
-echo "Donwloading PDM and BLE libraries from NXP server..."
+echo "Downloading PDM and BLE libraries from NXP server..."
 
 rm -rf patch_for_K32W061_SDK_2_6_4.zip patch_for_K32W061_SDK_2_6_4
 wget https://www.nxp.com/downloads/en/libraries/patch_for_K32W061_SDK_2_6_4.zip
