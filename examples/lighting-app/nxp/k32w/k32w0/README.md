@@ -181,24 +181,24 @@ distribution (the demo-application was compiled on Ubuntu 20.04).
     ![MCUXpresso SDK Download](../../../../platform/nxp/k32w/k32w0/doc/images/mcux-sdk-download.JPG)
 
 -   Start building the application
-    -   with Secure Element
+    -   without Secure Element
 
 ```
 user@ubuntu:~/Desktop/git/connectedhomeip$ export NXP_K32W0_SDK_ROOT=/home/user/Desktop/SDK_2_6_4_K32W061DK6/
 user@ubuntu:~/Desktop/git/connectedhomeip$ ./third_party/nxp/k32w0_sdk/sdk_fixes/patch_k32w_sdk.sh
 user@ubuntu:~/Desktop/git/connectedhomeip$ source ./scripts/activate.sh
 user@ubuntu:~/Desktop/git/connectedhomeip$ cd examples/lighting-app/nxp/k32w/k32w0
-user@ubuntu:~/Desktop/git/connectedhomeip/examples/lighting-app/nxp/k32w/k32w0$ gn gen out/debug --args="k32w0_sdk_root=\"${NXP_K32W0_SDK_ROOT}\" chip_with_OM15082=1 chip_with_ot_cli=0 is_debug=false chip_crypto=\"mbedtls\" chip_with_se05x=1"
+user@ubuntu:~/Desktop/git/connectedhomeip/examples/lighting-app/nxp/k32w/k32w0$ gn gen out/debug --args="k32w0_sdk_root=\"${NXP_K32W0_SDK_ROOT}\" chip_with_OM15082=1 chip_with_ot_cli=0 is_debug=false chip_crypto=\"mbedtls\" mbedtls_use_tinycrypt=true chip_pw_tokenizer_logging=true chip_with_se05x=0"
 user@ubuntu:~/Desktop/git/connectedhomeip/examples/lighting-app/nxp/k32w/k32w0$ ninja -C out/debug
 user@ubuntu:~/Desktop/git/connectedhomeip/examples/lighting-app/nxp/k32w/k32w0$ $NXP_K32W0_SDK_ROOT/tools/imagetool/sign_images.sh out/debug/
 ```
 
-    -   without Secure element
-        Exactly the same steps as above but set chip_with_se05x=0 in the gn command
+    -   with Secure element
+        Exactly the same steps as above but set chip_with_se05x=1 in the gn command
 
     -   for K32W041AM flavour:
         Exactly the same steps as above but set build_for_k32w041am=1 in the gn command.
-        Also, select the K32W041AM SDK from the SDK Builder.
+        Also, K32W041AM specific SDK must be used.
 
 Note that "patch_k32w_sdk.sh" script must be run for patching the K32W0 SDK
 2.6.4.
