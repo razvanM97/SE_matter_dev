@@ -35,7 +35,6 @@
 
 #include <openthread/platform/entropy.h>
 
-#include "K32W061.h"
 #include "MemManager.h"
 #include "RNG_Interface.h"
 #include "TimersManager.h"
