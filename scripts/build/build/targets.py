@@ -247,6 +247,7 @@ def HostTargets():
         app_targets.append(target.Extend('thermostat', app=HostApp.THERMOSTAT))
         app_targets.append(target.Extend('minmdns', app=HostApp.MIN_MDNS))
         app_targets.append(target.Extend('light', app=HostApp.LIGHT))
+        app_targets.append(target.Extend('light-rpc', app=HostApp.LIGHT, enable_rpcs=True))
         app_targets.append(target.Extend('lock', app=HostApp.LOCK))
         app_targets.append(target.Extend('shell', app=HostApp.SHELL))
         app_targets.append(target.Extend(
@@ -269,6 +270,7 @@ def HostTargets():
     builder.AppendVariant(name="ipv6only", enable_ipv4=False),
     builder.AppendVariant(name="no-ble", enable_ble=False),
     builder.AppendVariant(name="no-wifi", enable_wifi=False),
+    builder.AppendVariant(name="no-thread", enable_thread=False),
     builder.AppendVariant(name="tsan", conflicts=['asan'], use_tsan=True),
     builder.AppendVariant(name="asan", conflicts=['tsan'], use_asan=True),
     builder.AppendVariant(name="libfuzzer", requires=[
@@ -276,7 +278,6 @@ def HostTargets():
     builder.AppendVariant(name="clang", use_clang=True),
     builder.AppendVariant(name="test", extra_tests=True),
 
-    builder.WhitelistVariantNameForGlob('no-interactive-ipv6only')
     builder.WhitelistVariantNameForGlob('ipv6only')
 
     for target in app_targets:
@@ -287,12 +288,7 @@ def HostTargets():
             builder.targets.append(target)
 
     for target in builder.AllVariants():
-        if cross_compile and 'chip-tool' in target.name and 'arm64' in target.name and '-no-interactive' not in target.name:
-            # Interactive builds will not compile by default on arm cross compiles
-            # because libreadline is not part of the default sysroot
-            yield target.GlobBlacklist('Arm crosscompile does not support libreadline-dev')
-        else:
-            yield target
+        yield target
 
     # Without extra build variants
     yield target_native.Extend('chip-cert', app=HostApp.CERT_TOOL)
@@ -304,9 +300,14 @@ def HostTargets():
     yield target_native.Extend('address-resolve-tool-platform-mdns-ipv6only', app=HostApp.ADDRESS_RESOLVE,
                                use_platform_mdns=True, enable_ipv4=False).GlobBlacklist("Reduce default build variants")
 
+    nodeps_args = dict(enable_ipv4=False, enable_ble=False, enable_wifi=False, enable_thread=False)
+    yield target_native.Extend('chip-tool-nodeps', app=HostApp.CHIP_TOOL, **nodeps_args)
+    yield target_native.Extend('all-clusters-app-nodeps', app=HostApp.ALL_CLUSTERS, **nodeps_args)
+
     test_target = Target(HostBoard.NATIVE.PlatformName(), HostBuilder)
-    for board in [HostBoard.NATIVE, HostBoard.FAKE]:
-        yield test_target.Extend(board.BoardName() + '-tests', board=board, app=HostApp.TESTS)
+    yield test_target.Extend(HostBoard.NATIVE.BoardName() + '-tests', board=HostBoard.NATIVE, app=HostApp.TESTS)
+    yield test_target.Extend(HostBoard.NATIVE.BoardName() + '-tests-clang', board=HostBoard.NATIVE, app=HostApp.TESTS, use_clang=True)
+    yield test_target.Extend(HostBoard.FAKE.BoardName() + '-tests', board=HostBoard.FAKE, app=HostApp.TESTS)
 
 
 def Esp32Targets():
@@ -319,6 +320,10 @@ def Esp32Targets():
                               enable_rpcs=True)
     yield esp32_target.Extend('m5stack-all-clusters-rpc-ipv6only', board=Esp32Board.M5Stack, app=Esp32App.ALL_CLUSTERS,
                               enable_rpcs=True, enable_ipv4=False)
+
+    yield esp32_target.Extend('m5stack-ota-requestor', board=Esp32Board.M5Stack, app=Esp32App.OTA_REQUESTOR)
+    yield esp32_target.Extend('m5stack-ota-requestor-rpc', board=Esp32Board.M5Stack, app=Esp32App.OTA_REQUESTOR,
+                              enable_rpcs=True)
 
     yield esp32_target.Extend('c3devkit-all-clusters', board=Esp32Board.C3DevKit, app=Esp32App.ALL_CLUSTERS)
 
@@ -407,7 +412,7 @@ def NrfTargets():
     ]
 
     # Enable nrf52840dongle for all-clusters and lighting app only
-    yield target.Extend('nrf52840dongle-all-clusters', board=NrfBoard.NRF52840DONGLE, app=NrfApp.ALL_CLUSTERS)
+    yield target.Extend('nrf52840dongle-all-clusters', board=NrfBoard.NRF52840DONGLE, app=NrfApp.ALL_CLUSTERS).GlobBlacklist('Out of flash when linking')
     yield target.Extend('nrf52840dongle-all-clusters-minimal', board=NrfBoard.NRF52840DONGLE, app=NrfApp.ALL_CLUSTERS_MINIMAL)
     yield target.Extend('nrf52840dongle-light', board=NrfBoard.NRF52840DONGLE, app=NrfApp.LIGHT)
 
@@ -552,6 +557,7 @@ def TizenTargets():
 
     target = Target('tizen-arm', TizenBuilder, board=TizenBoard.ARM)
 
+    builder.targets.append(target.Extend('chip-tool', app=TizenApp.CHIP_TOOL))
     builder.targets.append(target.Extend('light', app=TizenApp.LIGHT))
 
     for target in builder.AllVariants():

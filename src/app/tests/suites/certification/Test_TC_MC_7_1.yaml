@@ -29,15 +29,15 @@ tests:
                 value: nodeId
 
     - label: "Reads the OutputList attribute"
+      PICS: MC_AUDIOOUTPUT.S.A0000
       command: "readAttribute"
       attribute: "OutputList"
       response:
           constraints:
               type: OutPutInfo
 
-    #Issue 18100
     - label: "Sends a SelectAudioOutput command"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_AUDIOOUTPUT.S.C0000
       command: "SelectOutput"
       arguments:
           values:
@@ -45,7 +45,7 @@ tests:
                 value: 1
 
     - label: "Reads the CurrentOutput attribute"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_AUDIOOUTPUT.S.A0001
       command: "readAttribute"
       attribute: "CurrentOutput"
       response:

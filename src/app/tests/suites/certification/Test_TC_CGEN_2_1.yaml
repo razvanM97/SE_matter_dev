@@ -32,24 +32,29 @@ tests:
                 value: nodeId
 
     - label: "TH1 reads the BreadCrumb Attribute from the DUT"
+      PICS: CGEN.S.A0000
       command: "readAttribute"
       attribute: "Breadcrumb"
       response:
-          value: 0
+          constraints:
+              type: uint64
 
     - label: "TH1 writes the BreadCrumb attribute as 1 to the DUT"
+      PICS: CGEN.S.A0000
       command: "writeAttribute"
       attribute: "Breadcrumb"
       arguments:
           value: 1
 
     - label: "TH1 reads the BreadCrumb attribute from the DUT"
+      PICS: CGEN.S.A0000
       command: "readAttribute"
       attribute: "Breadcrumb"
       response:
           value: 1
 
     - label: "TH1 reads the RegulatoryConfig attribute from the DUT"
+      PICS: CGEN.S.A0002
       command: "readAttribute"
       attribute: "RegulatoryConfig"
       response:
@@ -58,6 +63,7 @@ tests:
               maxValue: 2
 
     - label: "TH1 reads the LocationCapability attribute from the DUT"
+      PICS: CGEN.S.A0003
       command: "readAttribute"
       attribute: "LocationCapability"
       response:
@@ -66,9 +72,32 @@ tests:
               maxValue: 2
 
     #Issue 17997
-    - label: "TH1 reads BasicCommissioningInfo attribute from DUT"
-      PICS: PICS_SKIP_SAMPLE_APP
+    - label:
+          "TH1 reads BasicCommissioningInfo attribute from DUT and Verify that
+          the BasicCommissioningInfo attribute has the following field:
+          FailSafeExpiryLengthSeconds field value is within a duration range of
+          0 to 65535"
+      PICS: CGEN.S.A0001
       command: "readAttribute"
       attribute: "BasicCommissioningInfo"
+
+    - label:
+          "Step 6 is implicitly validating the attribute(BasicCommissioningInfo)
+          constraints, as long as the payload is being parsed successfully"
+      cluster: "LogCommands"
+      command: "UserPrompt"
+      PICS: PICS_USER_PROMPT
+      arguments:
+          values:
+              - name: "message"
+                value: "Please enter 'y' for success"
+              - name: "expectedValue"
+                value: "y"
+
+    - label: "TH1 reads SupportsConcurrentConnection attribute from the DUT"
+      PICS: CGEN.S.A0004
+      command: "readAttribute"
+      attribute: "SupportsConcurrentConnection"
       response:
-          value: { FailSafeExpiryLengthSeconds: 60 }
+          constraints:
+              type: bool

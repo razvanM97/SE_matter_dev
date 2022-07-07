@@ -1,3 +1,20 @@
+/*
+ *    Copyright (c) 2022 Project CHIP Authors
+ *    All rights reserved.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 #pragma once
 
 #include <crypto/CHIPCryptoPAL.h>
@@ -44,7 +61,7 @@ public:
      *
      * The keypair is temporary and becomes usable for `SignWithOpKeypair` only after either
      * `ActivateOpKeypairForFabric` is called. It is destroyed if
-     * `RevertPendingKeypair` or `Finish` is called before `CommitOpKeypairForFabric`.
+     * `RevertPendingKeypair` is called before `CommitOpKeypairForFabric`.
      *  If a pending keypair already existed for the given `fabricIndex`, it is replaced by this call.
      *
      *  Only one pending operational keypair is supported at a time.
@@ -151,6 +168,32 @@ public:
      */
     virtual CHIP_ERROR SignWithOpKeypair(FabricIndex fabricIndex, const ByteSpan & message,
                                          Crypto::P256ECDSASignature & outSignature) const = 0;
+
+    /**
+     * @brief Create an ephemeral keypair for use in session establishment.
+     *
+     * The caller must Initialize() the P256Keypair if needed. It is not done by this method.
+     *
+     * This method MUST ONLY be used for CASESession ephemeral keys.
+     *
+     * NOTE: The stack will allocate as many of these as there are CASE sessions which
+     *       can be concurrently in the process of establishment. Implementations must
+     *       support more than one such keypair, or be implemented to match the limitations
+     *       enforced by a given product on its concurrent CASE session establishment limits.
+     *
+     * WARNING: The return value MUST be released by `ReleaseEphemeralKeypair`. This is because
+     *          Matter CHIPMem.h does not properly support UniquePtr in a way that would
+     *          safely allow classes derived from Crypto::P256Keypair to be released properly.
+     *
+     * @return a pointer to a P256Keypair (or derived class thereof), which may evaluate to nullptr
+     *         if running out of memory.
+     */
+    virtual Crypto::P256Keypair * AllocateEphemeralKeypairForCASE() = 0;
+
+    /**
+     * @brief Release an ephemeral keypair previously provided by `AllocateEphemeralKeypairForCASE()`
+     */
+    virtual void ReleaseEphemeralKeypair(Crypto::P256Keypair * keypair) = 0;
 };
 
 } // namespace Crypto

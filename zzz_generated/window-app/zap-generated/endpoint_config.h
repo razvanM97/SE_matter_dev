@@ -93,7 +93,7 @@
 
 #define ZAP_ATTRIBUTE_MASK(mask) ATTRIBUTE_MASK_##mask
 // This is an array of EmberAfAttributeMetadata structures.
-#define GENERATED_ATTRIBUTE_COUNT 282
+#define GENERATED_ATTRIBUTE_COUNT 301
 #define GENERATED_ATTRIBUTES                                                                                                       \
     {                                                                                                                              \
                                                                                                                                    \
@@ -103,62 +103,62 @@
             { 0x00000002, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() },  /* client list */      \
             { 0x00000003, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() },  /* parts list */       \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) },                                /* FeatureMap */       \
-            { 0x0000FFFD, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* ClusterRevision */  \
+            { 0x0000FFFD, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* ClusterRevision */  \
                                                                                                                                    \
             /* Endpoint: 0, Cluster: Access Control (server) */                                                                    \
             { 0x00000000, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(WRITABLE),                 \
               ZAP_EMPTY_DEFAULT() }, /* ACL */                                                                                     \
             { 0x00000001, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(WRITABLE),                 \
               ZAP_EMPTY_DEFAULT() }, /* Extension */                                                                               \
-            { 0x00000002, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000002, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* SubjectsPerAccessControlEntry */                                                           \
-            { 0x00000003, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000003, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* TargetsPerAccessControlEntry */                                                            \
-            { 0x00000004, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000004, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() },                                         /* AccessControlEntriesPerFabric */                   \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) }, /* FeatureMap */                                      \
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) },   /* ClusterRevision */                                 \
                                                                                                                                    \
             /* Endpoint: 0, Cluster: Basic (server) */                                                                             \
-            { 0x00000000, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),               \
+            { 0x00000000, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),               \
               ZAP_EMPTY_DEFAULT() }, /* DataModelRevision */                                                                       \
-            { 0x00000001, ZAP_TYPE(CHAR_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),          \
+            { 0x00000001, ZAP_TYPE(CHAR_STRING), 33, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),         \
               ZAP_EMPTY_DEFAULT() }, /* VendorName */                                                                              \
-            { 0x00000002, ZAP_TYPE(VENDOR_ID), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),            \
+            { 0x00000002, ZAP_TYPE(VENDOR_ID), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),            \
               ZAP_EMPTY_DEFAULT() }, /* VendorID */                                                                                \
-            { 0x00000003, ZAP_TYPE(CHAR_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),          \
+            { 0x00000003, ZAP_TYPE(CHAR_STRING), 33, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),         \
               ZAP_EMPTY_DEFAULT() }, /* ProductName */                                                                             \
-            { 0x00000004, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),               \
+            { 0x00000004, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),               \
               ZAP_EMPTY_DEFAULT() }, /* ProductID */                                                                               \
             { 0x00000005, ZAP_TYPE(CHAR_STRING), 33,                                                                               \
               ZAP_ATTRIBUTE_MASK(TOKENIZE) | ZAP_ATTRIBUTE_MASK(SINGLETON) | ZAP_ATTRIBUTE_MASK(WRITABLE),                         \
               ZAP_EMPTY_DEFAULT() }, /* NodeLabel */                                                                               \
-            { 0x00000006, ZAP_TYPE(CHAR_STRING), 0,                                                                                \
+            { 0x00000006, ZAP_TYPE(CHAR_STRING), 3,                                                                                \
               ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON) | ZAP_ATTRIBUTE_MASK(WRITABLE),                 \
               ZAP_EMPTY_DEFAULT() }, /* Location */                                                                                \
-            { 0x00000007, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),               \
+            { 0x00000007, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),               \
               ZAP_EMPTY_DEFAULT() }, /* HardwareVersion */                                                                         \
-            { 0x00000008, ZAP_TYPE(CHAR_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),          \
+            { 0x00000008, ZAP_TYPE(CHAR_STRING), 65, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),         \
               ZAP_EMPTY_DEFAULT() }, /* HardwareVersionString */                                                                   \
-            { 0x00000009, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),               \
+            { 0x00000009, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),               \
               ZAP_EMPTY_DEFAULT() }, /* SoftwareVersion */                                                                         \
-            { 0x0000000A, ZAP_TYPE(CHAR_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),          \
+            { 0x0000000A, ZAP_TYPE(CHAR_STRING), 65, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),         \
               ZAP_EMPTY_DEFAULT() }, /* SoftwareVersionString */                                                                   \
-            { 0x0000000B, ZAP_TYPE(CHAR_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),          \
+            { 0x0000000B, ZAP_TYPE(CHAR_STRING), 17, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),         \
               ZAP_EMPTY_DEFAULT() }, /* ManufacturingDate */                                                                       \
-            { 0x0000000C, ZAP_TYPE(CHAR_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),          \
+            { 0x0000000C, ZAP_TYPE(CHAR_STRING), 33, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),         \
               ZAP_EMPTY_DEFAULT() }, /* PartNumber */                                                                              \
-            { 0x0000000D, ZAP_TYPE(LONG_CHAR_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),     \
+            { 0x0000000D, ZAP_TYPE(LONG_CHAR_STRING), 258, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),   \
               ZAP_EMPTY_DEFAULT() }, /* ProductURL */                                                                              \
-            { 0x0000000E, ZAP_TYPE(CHAR_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),          \
+            { 0x0000000E, ZAP_TYPE(CHAR_STRING), 65, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),         \
               ZAP_EMPTY_DEFAULT() }, /* ProductLabel */                                                                            \
-            { 0x0000000F, ZAP_TYPE(CHAR_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),          \
+            { 0x0000000F, ZAP_TYPE(CHAR_STRING), 33, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),         \
               ZAP_EMPTY_DEFAULT() }, /* SerialNumber */                                                                            \
             { 0x00000010, ZAP_TYPE(BOOLEAN), 1,                                                                                    \
               ZAP_ATTRIBUTE_MASK(TOKENIZE) | ZAP_ATTRIBUTE_MASK(SINGLETON) | ZAP_ATTRIBUTE_MASK(WRITABLE),                         \
               ZAP_SIMPLE_DEFAULT(0) },                                                                  /* LocalConfigDisabled */  \
             { 0x00000011, ZAP_TYPE(BOOLEAN), 1, ZAP_ATTRIBUTE_MASK(SINGLETON), ZAP_SIMPLE_DEFAULT(1) }, /* Reachable */            \
-            { 0x00000012, ZAP_TYPE(CHAR_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),          \
+            { 0x00000012, ZAP_TYPE(CHAR_STRING), 33, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(SINGLETON),         \
               ZAP_EMPTY_DEFAULT() },                                                                        /* UniqueID */         \
             { 0x00000013, ZAP_TYPE(STRUCT), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* CapabilityMinima */ \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, ZAP_ATTRIBUTE_MASK(SINGLETON), ZAP_SIMPLE_DEFAULT(0) },    /* FeatureMap */       \
@@ -213,10 +213,12 @@
             { 0x00000000, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(WRITABLE), ZAP_LONG_DEFAULTS_INDEX(6) }, /* Breadcrumb */        \
             { 0x00000001, ZAP_TYPE(STRUCT), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* BasicCommissioningInfo */                                                                  \
-            { 0x00000002, ZAP_TYPE(ENUM8), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RegulatoryConfig */  \
-            { 0x00000003, ZAP_TYPE(ENUM8), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                                \
-              ZAP_EMPTY_DEFAULT() },                                         /* LocationCapability */                              \
-            { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(6) }, /* FeatureMap */                                      \
+            { 0x00000002, ZAP_TYPE(ENUM8), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RegulatoryConfig */  \
+            { 0x00000003, ZAP_TYPE(ENUM8), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                                \
+              ZAP_EMPTY_DEFAULT() }, /* LocationCapability */                                                                      \
+            { 0x00000004, ZAP_TYPE(BOOLEAN), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                              \
+              ZAP_EMPTY_DEFAULT() },                                         /* SupportsConcurrentConnection */                    \
+            { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) }, /* FeatureMap */                                      \
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) },   /* ClusterRevision */                                 \
                                                                                                                                    \
             /* Endpoint: 0, Cluster: Network Commissioning (server) */                                                             \
@@ -233,125 +235,125 @@
                                                                                                                                    \
             /* Endpoint: 0, Cluster: General Diagnostics (server) */                                                               \
             { 0x00000000, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* NetworkInterfaces */ \
-            { 0x00000001, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RebootCount */      \
-            { 0x00000002, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* UpTime */           \
-            { 0x00000003, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000001, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RebootCount */      \
+            { 0x00000002, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* UpTime */           \
+            { 0x00000003, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* TotalOperationalHours */                                                                   \
-            { 0x00000004, ZAP_TYPE(ENUM8), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* BootReasons */       \
+            { 0x00000004, ZAP_TYPE(ENUM8), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* BootReasons */       \
             { 0x00000005, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                                \
               ZAP_EMPTY_DEFAULT() }, /* ActiveHardwareFaults */                                                                    \
             { 0x00000006, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* ActiveRadioFaults */ \
             { 0x00000007, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                                \
               ZAP_EMPTY_DEFAULT() }, /* ActiveNetworkFaults */                                                                     \
-            { 0x00000008, ZAP_TYPE(BOOLEAN), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                              \
+            { 0x00000008, ZAP_TYPE(BOOLEAN), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                              \
               ZAP_EMPTY_DEFAULT() },                                         /* TestEventTriggersEnabled */                        \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) }, /* FeatureMap */                                      \
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) },   /* ClusterRevision */                                 \
                                                                                                                                    \
             /* Endpoint: 0, Cluster: Software Diagnostics (server) */                                                              \
             { 0x00000000, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() },  /* ThreadMetrics */    \
-            { 0x00000001, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* CurrentHeapFree */  \
-            { 0x00000002, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* CurrentHeapUsed */  \
-            { 0x00000003, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000001, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* CurrentHeapFree */  \
+            { 0x00000002, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* CurrentHeapUsed */  \
+            { 0x00000003, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() },                                         /* CurrentHeapHighWatermark */                        \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(1) }, /* FeatureMap */                                      \
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) },   /* ClusterRevision */                                 \
                                                                                                                                    \
             /* Endpoint: 0, Cluster: Thread Network Diagnostics (server) */                                                        \
-            { 0x00000000, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
+            { 0x00000000, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
               ZAP_EMPTY_DEFAULT() }, /* channel */                                                                                 \
-            { 0x00000001, ZAP_TYPE(ENUM8), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
+            { 0x00000001, ZAP_TYPE(ENUM8), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
               ZAP_EMPTY_DEFAULT() }, /* RoutingRole */                                                                             \
-            { 0x00000002, ZAP_TYPE(CHAR_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),           \
+            { 0x00000002, ZAP_TYPE(CHAR_STRING), 17, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),          \
               ZAP_EMPTY_DEFAULT() }, /* NetworkName */                                                                             \
-            { 0x00000003, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
+            { 0x00000003, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
               ZAP_EMPTY_DEFAULT() }, /* PanId */                                                                                   \
-            { 0x00000004, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
+            { 0x00000004, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
               ZAP_EMPTY_DEFAULT() }, /* ExtendedPanId */                                                                           \
-            { 0x00000005, ZAP_TYPE(OCTET_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),          \
+            { 0x00000005, ZAP_TYPE(OCTET_STRING), 18, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),         \
               ZAP_EMPTY_DEFAULT() },                                                                        /* MeshLocalPrefix */  \
-            { 0x00000006, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* OverrunCount */     \
+            { 0x00000006, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* OverrunCount */     \
             { 0x00000007, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* NeighborTableList */ \
             { 0x00000008, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RouteTableList */    \
-            { 0x00000009, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
+            { 0x00000009, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
               ZAP_EMPTY_DEFAULT() }, /* PartitionId */                                                                             \
-            { 0x0000000A, ZAP_TYPE(INT8U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
+            { 0x0000000A, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
               ZAP_EMPTY_DEFAULT() }, /* weighting */                                                                               \
-            { 0x0000000B, ZAP_TYPE(INT8U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
+            { 0x0000000B, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
               ZAP_EMPTY_DEFAULT() }, /* DataVersion */                                                                             \
-            { 0x0000000C, ZAP_TYPE(INT8U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
+            { 0x0000000C, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
               ZAP_EMPTY_DEFAULT() }, /* StableDataVersion */                                                                       \
-            { 0x0000000D, ZAP_TYPE(INT8U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
+            { 0x0000000D, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
               ZAP_EMPTY_DEFAULT() }, /* LeaderRouterId */                                                                          \
-            { 0x0000000E, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x0000000E, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* DetachedRoleCount */                                                                       \
-            { 0x0000000F, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* ChildRoleCount */   \
-            { 0x00000010, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RouterRoleCount */  \
-            { 0x00000011, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* LeaderRoleCount */  \
-            { 0x00000012, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x0000000F, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* ChildRoleCount */   \
+            { 0x00000010, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RouterRoleCount */  \
+            { 0x00000011, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* LeaderRoleCount */  \
+            { 0x00000012, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* AttachAttemptCount */                                                                      \
-            { 0x00000013, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000013, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* PartitionIdChangeCount */                                                                  \
-            { 0x00000014, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000014, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* BetterPartitionAttachAttemptCount */                                                       \
-            { 0x00000015, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000015, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* ParentChangeCount */                                                                       \
-            { 0x00000016, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxTotalCount */     \
-            { 0x00000017, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxUnicastCount */   \
-            { 0x00000018, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxBroadcastCount */ \
-            { 0x00000019, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000016, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxTotalCount */     \
+            { 0x00000017, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxUnicastCount */   \
+            { 0x00000018, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxBroadcastCount */ \
+            { 0x00000019, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* TxAckRequestedCount */                                                                     \
-            { 0x0000001A, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxAckedCount */     \
-            { 0x0000001B, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x0000001A, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxAckedCount */     \
+            { 0x0000001B, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* TxNoAckRequestedCount */                                                                   \
-            { 0x0000001C, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxDataCount */      \
-            { 0x0000001D, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxDataPollCount */  \
-            { 0x0000001E, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxBeaconCount */    \
-            { 0x0000001F, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x0000001C, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxDataCount */      \
+            { 0x0000001D, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxDataPollCount */  \
+            { 0x0000001E, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxBeaconCount */    \
+            { 0x0000001F, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* TxBeaconRequestCount */                                                                    \
-            { 0x00000020, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxOtherCount */     \
-            { 0x00000021, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxRetryCount */     \
-            { 0x00000022, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000020, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxOtherCount */     \
+            { 0x00000021, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxRetryCount */     \
+            { 0x00000022, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* TxDirectMaxRetryExpiryCount */                                                             \
-            { 0x00000023, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000023, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* TxIndirectMaxRetryExpiryCount */                                                           \
-            { 0x00000024, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxErrCcaCount */    \
-            { 0x00000025, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxErrAbortCount */  \
-            { 0x00000026, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000024, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxErrCcaCount */    \
+            { 0x00000025, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxErrAbortCount */  \
+            { 0x00000026, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* TxErrBusyChannelCount */                                                                   \
-            { 0x00000027, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxTotalCount */     \
-            { 0x00000028, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxUnicastCount */   \
-            { 0x00000029, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxBroadcastCount */ \
-            { 0x0000002A, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxDataCount */      \
-            { 0x0000002B, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxDataPollCount */  \
-            { 0x0000002C, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxBeaconCount */    \
-            { 0x0000002D, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000027, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxTotalCount */     \
+            { 0x00000028, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxUnicastCount */   \
+            { 0x00000029, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxBroadcastCount */ \
+            { 0x0000002A, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxDataCount */      \
+            { 0x0000002B, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxDataPollCount */  \
+            { 0x0000002C, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxBeaconCount */    \
+            { 0x0000002D, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* RxBeaconRequestCount */                                                                    \
-            { 0x0000002E, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxOtherCount */     \
-            { 0x0000002F, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x0000002E, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxOtherCount */     \
+            { 0x0000002F, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* RxAddressFilteredCount */                                                                  \
-            { 0x00000030, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000030, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* RxDestAddrFilteredCount */                                                                 \
-            { 0x00000031, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000031, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* RxDuplicatedCount */                                                                       \
-            { 0x00000032, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000032, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* RxErrNoFrameCount */                                                                       \
-            { 0x00000033, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000033, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* RxErrUnknownNeighborCount */                                                               \
-            { 0x00000034, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000034, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* RxErrInvalidSrcAddrCount */                                                                \
-            { 0x00000035, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxErrSecCount */    \
-            { 0x00000036, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxErrFcsCount */    \
-            { 0x00000037, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxErrOtherCount */  \
-            { 0x00000038, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
+            { 0x00000035, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxErrSecCount */    \
+            { 0x00000036, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxErrFcsCount */    \
+            { 0x00000037, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* RxErrOtherCount */  \
+            { 0x00000038, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
               ZAP_EMPTY_DEFAULT() }, /* ActiveTimestamp */                                                                         \
-            { 0x00000039, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
+            { 0x00000039, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
               ZAP_EMPTY_DEFAULT() }, /* PendingTimestamp */                                                                        \
-            { 0x0000003A, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
+            { 0x0000003A, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
               ZAP_EMPTY_DEFAULT() }, /* delay */                                                                                   \
             { 0x0000003B, ZAP_TYPE(STRUCT), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
               ZAP_EMPTY_DEFAULT() }, /* SecurityPolicy */                                                                          \
-            { 0x0000003C, ZAP_TYPE(OCTET_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),          \
+            { 0x0000003C, ZAP_TYPE(OCTET_STRING), 5, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),          \
               ZAP_EMPTY_DEFAULT() }, /* ChannelMask */                                                                             \
             { 0x0000003D, ZAP_TYPE(STRUCT), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
               ZAP_EMPTY_DEFAULT() }, /* OperationalDatasetComponents */                                                            \
@@ -361,64 +363,64 @@
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) },        /* ClusterRevision */                            \
                                                                                                                                    \
             /* Endpoint: 0, Cluster: WiFi Network Diagnostics (server) */                                                          \
-            { 0x00000000, ZAP_TYPE(OCTET_STRING), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),          \
+            { 0x00000000, ZAP_TYPE(OCTET_STRING), 7, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),          \
               ZAP_EMPTY_DEFAULT() }, /* bssid */                                                                                   \
-            { 0x00000001, ZAP_TYPE(ENUM8), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
+            { 0x00000001, ZAP_TYPE(ENUM8), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
               ZAP_EMPTY_DEFAULT() }, /* SecurityType */                                                                            \
-            { 0x00000002, ZAP_TYPE(ENUM8), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
+            { 0x00000002, ZAP_TYPE(ENUM8), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
               ZAP_EMPTY_DEFAULT() }, /* WiFiVersion */                                                                             \
-            { 0x00000003, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
+            { 0x00000003, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                \
               ZAP_EMPTY_DEFAULT() }, /* ChannelNumber */                                                                           \
-            { 0x00000004, ZAP_TYPE(INT8S), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
+            { 0x00000004, ZAP_TYPE(INT8S), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
               ZAP_EMPTY_DEFAULT() },                                                                        /* Rssi */             \
-            { 0x00000005, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* BeaconLostCount */  \
-            { 0x00000006, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* BeaconRxCount */    \
-            { 0x00000007, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000005, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* BeaconLostCount */  \
+            { 0x00000006, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* BeaconRxCount */    \
+            { 0x00000007, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* PacketMulticastRxCount */                                                                  \
-            { 0x00000008, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000008, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* PacketMulticastTxCount */                                                                  \
-            { 0x00000009, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000009, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* PacketUnicastRxCount */                                                                    \
-            { 0x0000000A, ZAP_TYPE(INT32U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x0000000A, ZAP_TYPE(INT32U), 4, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* PacketUnicastTxCount */                                                                    \
-            { 0x0000000B, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* CurrentMaxRate */   \
-            { 0x0000000C, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* OverrunCount */     \
+            { 0x0000000B, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* CurrentMaxRate */   \
+            { 0x0000000C, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* OverrunCount */     \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(3) },                                /* FeatureMap */       \
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) },                                  /* ClusterRevision */  \
                                                                                                                                    \
             /* Endpoint: 0, Cluster: Ethernet Network Diagnostics (server) */                                                      \
-            { 0x00000000, ZAP_TYPE(ENUM8), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
+            { 0x00000000, ZAP_TYPE(ENUM8), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),                 \
               ZAP_EMPTY_DEFAULT() }, /* PHYRate */                                                                                 \
-            { 0x00000001, ZAP_TYPE(BOOLEAN), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),               \
+            { 0x00000001, ZAP_TYPE(BOOLEAN), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),               \
               ZAP_EMPTY_DEFAULT() },                                                                        /* FullDuplex */       \
-            { 0x00000002, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* PacketRxCount */    \
-            { 0x00000003, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* PacketTxCount */    \
-            { 0x00000004, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxErrCount */       \
-            { 0x00000005, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* CollisionCount */   \
-            { 0x00000006, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* OverrunCount */     \
-            { 0x00000007, ZAP_TYPE(BOOLEAN), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),               \
+            { 0x00000002, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* PacketRxCount */    \
+            { 0x00000003, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* PacketTxCount */    \
+            { 0x00000004, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TxErrCount */       \
+            { 0x00000005, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* CollisionCount */   \
+            { 0x00000006, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* OverrunCount */     \
+            { 0x00000007, ZAP_TYPE(BOOLEAN), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(NULLABLE),               \
               ZAP_EMPTY_DEFAULT() },                                                                        /* CarrierDetect */    \
-            { 0x00000008, ZAP_TYPE(INT64U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TimeSinceReset */   \
+            { 0x00000008, ZAP_TYPE(INT64U), 8, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* TimeSinceReset */   \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(3) },                                /* FeatureMap */       \
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) },                                  /* ClusterRevision */  \
                                                                                                                                    \
             /* Endpoint: 0, Cluster: AdministratorCommissioning (server) */                                                        \
-            { 0x00000000, ZAP_TYPE(INT8U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* WindowStatus */      \
-            { 0x00000001, ZAP_TYPE(FABRIC_IDX), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                           \
+            { 0x00000000, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* WindowStatus */      \
+            { 0x00000001, ZAP_TYPE(FABRIC_IDX), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                           \
               ZAP_EMPTY_DEFAULT() },                                                                        /* AdminFabricIndex */ \
-            { 0x00000002, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* AdminVendorId */    \
+            { 0x00000002, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* AdminVendorId */    \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) },                                /* FeatureMap */       \
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) },                                  /* ClusterRevision */  \
                                                                                                                                    \
             /* Endpoint: 0, Cluster: Operational Credentials (server) */                                                           \
             { 0x00000000, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* NOCs */              \
             { 0x00000001, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* Fabrics */           \
-            { 0x00000002, ZAP_TYPE(INT8U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* SupportedFabrics */  \
-            { 0x00000003, ZAP_TYPE(INT8U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                                \
+            { 0x00000002, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* SupportedFabrics */  \
+            { 0x00000003, ZAP_TYPE(INT8U), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                                \
               ZAP_EMPTY_DEFAULT() }, /* CommissionedFabrics */                                                                     \
             { 0x00000004, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                                \
               ZAP_EMPTY_DEFAULT() }, /* TrustedRootCertificates */                                                                 \
-            { 0x00000005, ZAP_TYPE(FABRIC_IDX), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                           \
+            { 0x00000005, ZAP_TYPE(FABRIC_IDX), 1, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                           \
               ZAP_EMPTY_DEFAULT() },                                         /* CurrentFabricIndex */                              \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) }, /* FeatureMap */                                      \
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) },   /* ClusterRevision */                                 \
@@ -427,9 +429,9 @@
             { 0x00000000, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE) | ZAP_ATTRIBUTE_MASK(WRITABLE),                 \
               ZAP_EMPTY_DEFAULT() },                                                                       /* GroupKeyMap */       \
             { 0x00000001, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* GroupTable */        \
-            { 0x00000002, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000002, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() }, /* MaxGroupsPerFabric */                                                                      \
-            { 0x00000003, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
+            { 0x00000003, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE),                                               \
               ZAP_EMPTY_DEFAULT() },                                         /* MaxGroupKeysPerFabric */                           \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) }, /* FeatureMap */                                      \
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) },   /* ClusterRevision */                                 \
@@ -446,15 +448,24 @@
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(1) },   /* ClusterRevision */                                 \
                                                                                                                                    \
             /* Endpoint: 1, Cluster: Identify (server) */                                                                          \
-            { 0x00000000, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(WRITABLE), ZAP_SIMPLE_DEFAULT(0x0000) }, /* identify time */     \
-            { 0x00000001, ZAP_TYPE(ENUM8), 1, 0, ZAP_SIMPLE_DEFAULT(0x0) },                                /* identify type */     \
-            { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) },                               /* FeatureMap */        \
-            { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(4) },                                 /* ClusterRevision */   \
+            { 0x00000000, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(WRITABLE), ZAP_SIMPLE_DEFAULT(0x0) }, /* identify time */        \
+            { 0x00000001, ZAP_TYPE(ENUM8), 1, 0, ZAP_SIMPLE_DEFAULT(0x05) },                            /* identify type */        \
+            { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) },                            /* FeatureMap */           \
+            { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(4) },                              /* ClusterRevision */      \
                                                                                                                                    \
             /* Endpoint: 1, Cluster: Groups (server) */                                                                            \
             { 0x00000000, ZAP_TYPE(BITMAP8), 1, 0, ZAP_EMPTY_DEFAULT() },    /* name support */                                    \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) }, /* FeatureMap */                                      \
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(4) },   /* ClusterRevision */                                 \
+                                                                                                                                   \
+            /* Endpoint: 1, Cluster: Scenes (server) */                                                                            \
+            { 0x00000000, ZAP_TYPE(INT8U), 1, 0, ZAP_SIMPLE_DEFAULT(0x00) },      /* SceneCount */                                 \
+            { 0x00000001, ZAP_TYPE(INT8U), 1, 0, ZAP_SIMPLE_DEFAULT(0x00) },      /* CurrentScene */                               \
+            { 0x00000002, ZAP_TYPE(GROUP_ID), 2, 0, ZAP_SIMPLE_DEFAULT(0x0000) }, /* CurrentGroup */                               \
+            { 0x00000003, ZAP_TYPE(BOOLEAN), 1, 0, ZAP_SIMPLE_DEFAULT(0x00) },    /* SceneValid */                                 \
+            { 0x00000004, ZAP_TYPE(BITMAP8), 1, 0, ZAP_EMPTY_DEFAULT() },         /* NameSupport */                                \
+            { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) },      /* FeatureMap */                                 \
+            { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(4) },        /* ClusterRevision */                            \
                                                                                                                                    \
             /* Endpoint: 1, Cluster: Descriptor (server) */                                                                        \
             { 0x00000000, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() },  /* device list */      \
@@ -462,7 +473,7 @@
             { 0x00000002, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() },  /* client list */      \
             { 0x00000003, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() },  /* parts list */       \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) },                                /* FeatureMap */       \
-            { 0x0000FFFD, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* ClusterRevision */  \
+            { 0x0000FFFD, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* ClusterRevision */  \
                                                                                                                                    \
             /* Endpoint: 1, Cluster: Window Covering (server) */                                                                   \
             { 0x00000000, ZAP_TYPE(ENUM8), 1, 0, ZAP_SIMPLE_DEFAULT(0x08) },    /* Type */                                         \
@@ -506,10 +517,25 @@
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0x0017) }, /* FeatureMap */                                 \
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(5) },        /* ClusterRevision */                            \
                                                                                                                                    \
+            /* Endpoint: 2, Cluster: Identify (server) */                                                                          \
+            { 0x00000000, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(WRITABLE), ZAP_SIMPLE_DEFAULT(0x0) }, /* identify time */        \
+            { 0x00000001, ZAP_TYPE(ENUM8), 1, 0, ZAP_SIMPLE_DEFAULT(0x05) },                            /* identify type */        \
+            { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) },                            /* FeatureMap */           \
+            { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(4) },                              /* ClusterRevision */      \
+                                                                                                                                   \
             /* Endpoint: 2, Cluster: Groups (server) */                                                                            \
             { 0x00000000, ZAP_TYPE(BITMAP8), 1, 0, ZAP_EMPTY_DEFAULT() },    /* name support */                                    \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) }, /* FeatureMap */                                      \
             { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(4) },   /* ClusterRevision */                                 \
+                                                                                                                                   \
+            /* Endpoint: 2, Cluster: Scenes (server) */                                                                            \
+            { 0x00000000, ZAP_TYPE(INT8U), 1, 0, ZAP_SIMPLE_DEFAULT(0x00) },      /* SceneCount */                                 \
+            { 0x00000001, ZAP_TYPE(INT8U), 1, 0, ZAP_SIMPLE_DEFAULT(0x00) },      /* CurrentScene */                               \
+            { 0x00000002, ZAP_TYPE(GROUP_ID), 2, 0, ZAP_SIMPLE_DEFAULT(0x0000) }, /* CurrentGroup */                               \
+            { 0x00000003, ZAP_TYPE(BOOLEAN), 1, 0, ZAP_SIMPLE_DEFAULT(0x00) },    /* SceneValid */                                 \
+            { 0x00000004, ZAP_TYPE(BITMAP8), 1, 0, ZAP_EMPTY_DEFAULT() },         /* NameSupport */                                \
+            { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) },      /* FeatureMap */                                 \
+            { 0x0000FFFD, ZAP_TYPE(INT16U), 2, 0, ZAP_SIMPLE_DEFAULT(4) },        /* ClusterRevision */                            \
                                                                                                                                    \
             /* Endpoint: 2, Cluster: Descriptor (server) */                                                                        \
             { 0x00000000, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() },  /* device list */      \
@@ -517,7 +543,7 @@
             { 0x00000002, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() },  /* client list */      \
             { 0x00000003, ZAP_TYPE(ARRAY), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() },  /* parts list */       \
             { 0x0000FFFC, ZAP_TYPE(BITMAP32), 4, 0, ZAP_SIMPLE_DEFAULT(0) },                                /* FeatureMap */       \
-            { 0x0000FFFD, ZAP_TYPE(INT16U), 0, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* ClusterRevision */  \
+            { 0x0000FFFD, ZAP_TYPE(INT16U), 2, ZAP_ATTRIBUTE_MASK(EXTERNAL_STORAGE), ZAP_EMPTY_DEFAULT() }, /* ClusterRevision */  \
                                                                                                                                    \
             /* Endpoint: 2, Cluster: Window Covering (server) */                                                                   \
             { 0x00000000, ZAP_TYPE(ENUM8), 1, 0, ZAP_SIMPLE_DEFAULT(0x08) },    /* Type */                                         \
@@ -586,6 +612,9 @@
     };                                                                                                                             \
     const EmberAfGenericClusterFunction chipFuncArrayGroupsServer[] = {                                                            \
         (EmberAfGenericClusterFunction) emberAfGroupsClusterServerInitCallback,                                                    \
+    };                                                                                                                             \
+    const EmberAfGenericClusterFunction chipFuncArrayScenesServer[] = {                                                            \
+        (EmberAfGenericClusterFunction) emberAfScenesClusterServerInitCallback,                                                    \
     };                                                                                                                             \
     const EmberAfGenericClusterFunction chipFuncArrayWindowCoveringServer[] = {                                                    \
         (EmberAfGenericClusterFunction) MatterWindowCoveringClusterServerAttributeChangedCallback,                                 \
@@ -688,8 +717,26 @@
   0x00000002 /* GetGroupMembershipResponse */, \
   0x00000003 /* RemoveGroupResponse */, \
   chip::kInvalidCommandId /* end of list */, \
-  /* Endpoint: 1, Cluster: Window Covering (server) */\
+  /* Endpoint: 1, Cluster: Scenes (server) */\
   /*   AcceptedCommandList (index=68) */ \
+  0x00000000 /* AddScene */, \
+  0x00000001 /* ViewScene */, \
+  0x00000002 /* RemoveScene */, \
+  0x00000003 /* RemoveAllScenes */, \
+  0x00000004 /* StoreScene */, \
+  0x00000005 /* RecallScene */, \
+  0x00000006 /* GetSceneMembership */, \
+  chip::kInvalidCommandId /* end of list */, \
+  /*   GeneratedCommandList (index=76)*/ \
+  0x00000000 /* AddSceneResponse */, \
+  0x00000001 /* ViewSceneResponse */, \
+  0x00000002 /* RemoveSceneResponse */, \
+  0x00000003 /* RemoveAllScenesResponse */, \
+  0x00000004 /* StoreSceneResponse */, \
+  0x00000006 /* GetSceneMembershipResponse */, \
+  chip::kInvalidCommandId /* end of list */, \
+  /* Endpoint: 1, Cluster: Window Covering (server) */\
+  /*   AcceptedCommandList (index=83) */ \
   0x00000000 /* UpOrOpen */, \
   0x00000001 /* DownOrClose */, \
   0x00000002 /* StopMotion */, \
@@ -698,8 +745,12 @@
   0x00000007 /* GoToTiltValue */, \
   0x00000008 /* GoToTiltPercentage */, \
   chip::kInvalidCommandId /* end of list */, \
+  /* Endpoint: 2, Cluster: Identify (server) */\
+  /*   AcceptedCommandList (index=91) */ \
+  0x00000000 /* Identify */, \
+  chip::kInvalidCommandId /* end of list */, \
   /* Endpoint: 2, Cluster: Groups (server) */\
-  /*   AcceptedCommandList (index=76) */ \
+  /*   AcceptedCommandList (index=93) */ \
   0x00000000 /* AddGroup */, \
   0x00000001 /* ViewGroup */, \
   0x00000002 /* GetGroupMembership */, \
@@ -707,14 +758,32 @@
   0x00000004 /* RemoveAllGroups */, \
   0x00000005 /* AddGroupIfIdentifying */, \
   chip::kInvalidCommandId /* end of list */, \
-  /*   GeneratedCommandList (index=83)*/ \
+  /*   GeneratedCommandList (index=100)*/ \
   0x00000000 /* AddGroupResponse */, \
   0x00000001 /* ViewGroupResponse */, \
   0x00000002 /* GetGroupMembershipResponse */, \
   0x00000003 /* RemoveGroupResponse */, \
   chip::kInvalidCommandId /* end of list */, \
+  /* Endpoint: 2, Cluster: Scenes (server) */\
+  /*   AcceptedCommandList (index=105) */ \
+  0x00000000 /* AddScene */, \
+  0x00000001 /* ViewScene */, \
+  0x00000002 /* RemoveScene */, \
+  0x00000003 /* RemoveAllScenes */, \
+  0x00000004 /* StoreScene */, \
+  0x00000005 /* RecallScene */, \
+  0x00000006 /* GetSceneMembership */, \
+  chip::kInvalidCommandId /* end of list */, \
+  /*   GeneratedCommandList (index=113)*/ \
+  0x00000000 /* AddSceneResponse */, \
+  0x00000001 /* ViewSceneResponse */, \
+  0x00000002 /* RemoveSceneResponse */, \
+  0x00000003 /* RemoveAllScenesResponse */, \
+  0x00000004 /* StoreSceneResponse */, \
+  0x00000006 /* GetSceneMembershipResponse */, \
+  chip::kInvalidCommandId /* end of list */, \
   /* Endpoint: 2, Cluster: Window Covering (server) */\
-  /*   AcceptedCommandList (index=88) */ \
+  /*   AcceptedCommandList (index=120) */ \
   0x00000000 /* UpOrOpen */, \
   0x00000001 /* DownOrClose */, \
   0x00000002 /* StopMotion */, \
@@ -728,7 +797,7 @@
 // clang-format on
 
 #define ZAP_CLUSTER_MASK(mask) CLUSTER_MASK_##mask
-#define GENERATED_CLUSTER_COUNT 30
+#define GENERATED_CLUSTER_COUNT 31
 
 // clang-format off
 #define GENERATED_CLUSTERS { \
@@ -835,7 +904,7 @@
       /* Endpoint: 0, Cluster: General Commissioning (server) */ \
       .clusterId = 0x00000030,  \
       .attributes = ZAP_ATTRIBUTE_INDEX(63), \
-      .attributeCount = 6, \
+      .attributeCount = 7, \
       .clusterSize = 14, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
       .functions = NULL, \
@@ -845,7 +914,7 @@
   { \
       /* Endpoint: 0, Cluster: Network Commissioning (server) */ \
       .clusterId = 0x00000031,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(69), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(70), \
       .attributeCount = 10, \
       .clusterSize = 48, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -856,7 +925,7 @@
   { \
       /* Endpoint: 0, Cluster: General Diagnostics (server) */ \
       .clusterId = 0x00000033,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(79), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(80), \
       .attributeCount = 11, \
       .clusterSize = 6, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -867,7 +936,7 @@
   { \
       /* Endpoint: 0, Cluster: Software Diagnostics (server) */ \
       .clusterId = 0x00000034,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(90), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(91), \
       .attributeCount = 6, \
       .clusterSize = 6, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -878,7 +947,7 @@
   { \
       /* Endpoint: 0, Cluster: Thread Network Diagnostics (server) */ \
       .clusterId = 0x00000035,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(96), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(97), \
       .attributeCount = 65, \
       .clusterSize = 6, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -889,7 +958,7 @@
   { \
       /* Endpoint: 0, Cluster: WiFi Network Diagnostics (server) */ \
       .clusterId = 0x00000036,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(161), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(162), \
       .attributeCount = 15, \
       .clusterSize = 6, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -900,7 +969,7 @@
   { \
       /* Endpoint: 0, Cluster: Ethernet Network Diagnostics (server) */ \
       .clusterId = 0x00000037,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(176), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(177), \
       .attributeCount = 11, \
       .clusterSize = 6, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -911,7 +980,7 @@
   { \
       /* Endpoint: 0, Cluster: AdministratorCommissioning (server) */ \
       .clusterId = 0x0000003C,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(187), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(188), \
       .attributeCount = 5, \
       .clusterSize = 6, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -922,7 +991,7 @@
   { \
       /* Endpoint: 0, Cluster: Operational Credentials (server) */ \
       .clusterId = 0x0000003E,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(192), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(193), \
       .attributeCount = 8, \
       .clusterSize = 6, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -933,7 +1002,7 @@
   { \
       /* Endpoint: 0, Cluster: Group Key Management (server) */ \
       .clusterId = 0x0000003F,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(200), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(201), \
       .attributeCount = 6, \
       .clusterSize = 6, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -944,7 +1013,7 @@
   { \
       /* Endpoint: 0, Cluster: Fixed Label (server) */ \
       .clusterId = 0x00000040,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(206), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(207), \
       .attributeCount = 3, \
       .clusterSize = 6, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -955,7 +1024,7 @@
   { \
       /* Endpoint: 0, Cluster: User Label (server) */ \
       .clusterId = 0x00000041,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(209), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(210), \
       .attributeCount = 3, \
       .clusterSize = 6, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -966,7 +1035,7 @@
   { \
       /* Endpoint: 1, Cluster: Identify (server) */ \
       .clusterId = 0x00000003,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(212), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(213), \
       .attributeCount = 4, \
       .clusterSize = 9, \
       .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION) | ZAP_CLUSTER_MASK(ATTRIBUTE_CHANGED_FUNCTION), \
@@ -977,7 +1046,7 @@
   { \
       /* Endpoint: 1, Cluster: Groups (server) */ \
       .clusterId = 0x00000004,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(216), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(217), \
       .attributeCount = 3, \
       .clusterSize = 7, \
       .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION), \
@@ -986,20 +1055,20 @@
       .generatedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 63 ) ,\
     },\
   { \
-      /* Endpoint: 1, Cluster: Scenes (client) */ \
+      /* Endpoint: 1, Cluster: Scenes (server) */ \
       .clusterId = 0x00000005,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(219), \
-      .attributeCount = 0, \
-      .clusterSize = 0, \
-      .mask = ZAP_CLUSTER_MASK(CLIENT), \
-      .functions = NULL, \
-      .acceptedCommandList = nullptr ,\
-      .generatedCommandList = nullptr ,\
+      .attributes = ZAP_ATTRIBUTE_INDEX(220), \
+      .attributeCount = 7, \
+      .clusterSize = 12, \
+      .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION), \
+      .functions = chipFuncArrayScenesServer, \
+      .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 68 ) ,\
+      .generatedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 76 ) ,\
     },\
   { \
       /* Endpoint: 1, Cluster: Descriptor (server) */ \
       .clusterId = 0x0000001D,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(219), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(227), \
       .attributeCount = 6, \
       .clusterSize = 4, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -1010,40 +1079,51 @@
   { \
       /* Endpoint: 1, Cluster: Window Covering (server) */ \
       .clusterId = 0x00000102,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(225), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(233), \
       .attributeCount = 24, \
       .clusterSize = 43, \
       .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(ATTRIBUTE_CHANGED_FUNCTION), \
       .functions = chipFuncArrayWindowCoveringServer, \
-      .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 68 ) ,\
+      .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 83 ) ,\
+      .generatedCommandList = nullptr ,\
+    },\
+  { \
+      /* Endpoint: 2, Cluster: Identify (server) */ \
+      .clusterId = 0x00000003,  \
+      .attributes = ZAP_ATTRIBUTE_INDEX(257), \
+      .attributeCount = 4, \
+      .clusterSize = 9, \
+      .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION) | ZAP_CLUSTER_MASK(ATTRIBUTE_CHANGED_FUNCTION), \
+      .functions = chipFuncArrayIdentifyServer, \
+      .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 91 ) ,\
       .generatedCommandList = nullptr ,\
     },\
   { \
       /* Endpoint: 2, Cluster: Groups (server) */ \
       .clusterId = 0x00000004,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(249), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(261), \
       .attributeCount = 3, \
       .clusterSize = 7, \
       .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION), \
       .functions = chipFuncArrayGroupsServer, \
-      .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 76 ) ,\
-      .generatedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 83 ) ,\
+      .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 93 ) ,\
+      .generatedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 100 ) ,\
     },\
   { \
-      /* Endpoint: 2, Cluster: Scenes (client) */ \
+      /* Endpoint: 2, Cluster: Scenes (server) */ \
       .clusterId = 0x00000005,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(252), \
-      .attributeCount = 0, \
-      .clusterSize = 0, \
-      .mask = ZAP_CLUSTER_MASK(CLIENT), \
-      .functions = NULL, \
-      .acceptedCommandList = nullptr ,\
-      .generatedCommandList = nullptr ,\
+      .attributes = ZAP_ATTRIBUTE_INDEX(264), \
+      .attributeCount = 7, \
+      .clusterSize = 12, \
+      .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(INIT_FUNCTION), \
+      .functions = chipFuncArrayScenesServer, \
+      .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 105 ) ,\
+      .generatedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 113 ) ,\
     },\
   { \
       /* Endpoint: 2, Cluster: Descriptor (server) */ \
       .clusterId = 0x0000001D,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(252), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(271), \
       .attributeCount = 6, \
       .clusterSize = 4, \
       .mask = ZAP_CLUSTER_MASK(SERVER), \
@@ -1054,12 +1134,12 @@
   { \
       /* Endpoint: 2, Cluster: Window Covering (server) */ \
       .clusterId = 0x00000102,  \
-      .attributes = ZAP_ATTRIBUTE_INDEX(258), \
+      .attributes = ZAP_ATTRIBUTE_INDEX(277), \
       .attributeCount = 24, \
       .clusterSize = 43, \
       .mask = ZAP_CLUSTER_MASK(SERVER) | ZAP_CLUSTER_MASK(ATTRIBUTE_CHANGED_FUNCTION), \
       .functions = chipFuncArrayWindowCoveringServer, \
-      .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 88 ) ,\
+      .acceptedCommandList = ZAP_GENERATED_COMMANDS_INDEX( 120 ) ,\
       .generatedCommandList = nullptr ,\
     },\
 }
@@ -1068,12 +1148,12 @@
 
 #define ZAP_CLUSTER_INDEX(index) (&generatedClusters[index])
 
-#define ZAP_FIXED_ENDPOINT_DATA_VERSION_COUNT 27
+#define ZAP_FIXED_ENDPOINT_DATA_VERSION_COUNT 30
 
 // This is an array of EmberAfEndpointType structures.
 #define GENERATED_ENDPOINT_TYPES                                                                                                   \
     {                                                                                                                              \
-        { ZAP_CLUSTER_INDEX(0), 21, 318 }, { ZAP_CLUSTER_INDEX(21), 5, 63 }, { ZAP_CLUSTER_INDEX(26), 4, 54 },                     \
+        { ZAP_CLUSTER_INDEX(0), 21, 318 }, { ZAP_CLUSTER_INDEX(21), 5, 75 }, { ZAP_CLUSTER_INDEX(26), 5, 75 },                     \
     }
 
 // Largest attribute size is needed for various buffers
@@ -1085,7 +1165,7 @@ static_assert(ATTRIBUTE_LARGEST <= CHIP_CONFIG_MAX_ATTRIBUTE_STORE_ELEMENT_SIZE,
 #define ATTRIBUTE_SINGLETONS_SIZE (41)
 
 // Total size of attribute storage
-#define ATTRIBUTE_MAX_SIZE (435)
+#define ATTRIBUTE_MAX_SIZE (468)
 
 // Number of fixed endpoints
 #define FIXED_ENDPOINT_COUNT (3)

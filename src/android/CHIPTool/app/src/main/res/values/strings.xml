@@ -39,6 +39,7 @@
     <string name="enter_pincode_label_text">Pincode</string>
     <string name="commission_btn_text">Commission</string>
     <string name="dns_discover_btn_text">Discover</string>
+    <string name="wifi_scan_btn_text">Wi-Fi Scan</string>
 
     <string name="send_command_on_btn_text">On</string>
     <string name="send_command_off_btn_text">Off</string>
@@ -140,9 +141,12 @@
     <string name="endpoint_id_label">Endpoint ID</string>
     <string name="cluster_id_label">Cluster ID</string>
     <string name="attribute_id_label">Attribute ID</string>
+    <string name="event_id_label">Event ID</string>
     <string name="wildcard_help_label">Leave blank for wildcard</string>
     <string name="wildcard_subscribe_btn_text">Subscribe</string>
     <string name="wildcard_read_btn_text">Read</string>
+    <string name="wildcard_subscribe_event_btn_text">Subscribe Event</string>
+    <string name="wildcard_read_event_btn_text">Read Event</string>
 
     <string name="provision_custom_flow_btn_text">Provision CHIP device with Custom Flow</string>
     <string name="chip_device_info_commissioning_flow_label">Commissioning Flow:</string>
@@ -163,4 +167,5 @@
     <string name="select_a_command">Select a command</string>
     <string name="select_a_cluster">Select a cluster</string>
     <string name="endpoint_name">Endpoint: </string>
+    <string name="wifi_connect_btn_text">Connect</string>
 </resources>

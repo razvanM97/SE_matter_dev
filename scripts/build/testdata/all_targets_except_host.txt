@@ -163,6 +163,8 @@ esp32-m5stack-all-clusters-minimal-rpc
 esp32-m5stack-all-clusters-minimal-rpc-ipv6only
 esp32-m5stack-all-clusters-rpc
 esp32-m5stack-all-clusters-rpc-ipv6only
+esp32-m5stack-ota-requestor
+esp32-m5stack-ota-requestor-rpc
 esp32-qemu-tests
 imx-all-clusters-app
 imx-all-clusters-app-release
@@ -212,7 +214,7 @@ nrf-nrf52840dk-lock
 nrf-nrf52840dk-pump
 nrf-nrf52840dk-pump-controller
 nrf-nrf52840dk-shell
-nrf-nrf52840dongle-all-clusters
+nrf-nrf52840dongle-all-clusters (NOGLOB: Out of flash when linking)
 nrf-nrf52840dongle-all-clusters-minimal
 nrf-nrf52840dongle-light
 nrf-nrf5340dk-all-clusters
@@ -229,6 +231,14 @@ qpg-persistent-storage
 qpg-shell
 telink-tlsr9518adk80d-light
 telink-tlsr9518adk80d-light-switch
+tizen-arm-chip-tool
+tizen-arm-chip-tool-asan (NOGLOB: Reduce default build variants)
+tizen-arm-chip-tool-no-ble (NOGLOB: Reduce default build variants)
+tizen-arm-chip-tool-no-ble-asan (NOGLOB: Reduce default build variants)
+tizen-arm-chip-tool-no-ble-no-wifi (NOGLOB: Reduce default build variants)
+tizen-arm-chip-tool-no-ble-no-wifi-asan (NOGLOB: Reduce default build variants)
+tizen-arm-chip-tool-no-wifi (NOGLOB: Reduce default build variants)
+tizen-arm-chip-tool-no-wifi-asan (NOGLOB: Reduce default build variants)
 tizen-arm-light
 tizen-arm-light-asan (NOGLOB: Reduce default build variants)
 tizen-arm-light-no-ble (NOGLOB: Reduce default build variants)

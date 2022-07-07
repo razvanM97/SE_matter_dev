@@ -28,34 +28,31 @@ tests:
               - name: "nodeId"
                 value: nodeId
 
-    - label: "Sending on command"
-      cluster: "On/Off"
-      command: "on"
+    - label: "Reads Minlevel attribute from DUT"
+      PICS: LVL.S.A0002
+      command: "readAttribute"
+      attribute: "min level"
+      response:
+          saveAs: MinlevelValue
+          constraints:
+              type: uint8
 
-    - label: "Precondition: DUT level is set to its lowest point"
-      command: "Step"
+    - label: "Sends MoveToLevelWithOnOff command to DUT"
+      PICS: LVL.S.C04.Rsp
+      command: "MoveToLevelWithOnOff"
       arguments:
           values:
-              - name: "stepMode"
+              - name: "level"
                 value: 1
-              - name: "stepSize"
-                value: 100
               - name: "transitionTime"
-                value: 20
+                value: 0
               - name: "optionMask"
-                value: 0
+                value: 1
               - name: "optionOverride"
-                value: 0
-
-    - label: "Wait 3000ms"
-      cluster: "DelayCommands"
-      command: "WaitForMs"
-      arguments:
-          values:
-              - name: "ms"
-                value: 3000
+                value: 1
 
     - label: "Reads current level attribute from DUT"
+      PICS: LVL.S.A0000
       command: "readAttribute"
       attribute: "current level"
       response:
@@ -64,6 +61,7 @@ tests:
               type: uint8
 
     - label: "Sends step up command to DUT"
+      PICS: LVL.S.C02.Rsp
       command: "Step"
       arguments:
           values:
@@ -72,41 +70,11 @@ tests:
               - name: "stepSize"
                 value: 64
               - name: "transitionTime"
-                value: 2
+                value: 20
               - name: "optionMask"
-                value: 0
-              - name: "optionOverride"
-                value: 0
-
-    - label: "Wait 5000ms"
-      cluster: "DelayCommands"
-      command: "WaitForMs"
-      arguments:
-          values:
-              - name: "ms"
-                value: 5000
-
-    - label: "Reads current level attribute from DUT"
-      command: "readAttribute"
-      attribute: "current level"
-      response:
-          constraints:
-              notValue: CurrentlevelValue
-
-    - label: "Sends a Step down command"
-      command: "Step"
-      arguments:
-          values:
-              - name: "stepMode"
                 value: 1
-              - name: "stepSize"
-                value: 64
-              - name: "transitionTime"
-                value: 2
-              - name: "optionMask"
-                value: 0
               - name: "optionOverride"
-                value: 0
+                value: 1
 
     - label: "Wait 4000ms"
       cluster: "DelayCommands"
@@ -117,12 +85,47 @@ tests:
                 value: 4000
 
     - label: "Reads current level attribute from DUT"
+      PICS: LVL.S.A0000 && LVL.S.C02.Rsp
+      command: "readAttribute"
+      attribute: "current level"
+      response:
+          value: 65
+          constraints:
+              type: uint8
+
+    - label: "Sends a StepWithOnOff command"
+      PICS: LVL.S.C06.Rsp
+      command: "StepWithOnOff"
+      arguments:
+          values:
+              - name: "stepMode"
+                value: 1
+              - name: "stepSize"
+                value: 64
+              - name: "transitionTime"
+                value: 20
+              - name: "optionMask"
+                value: 1
+              - name: "optionOverride"
+                value: 1
+
+    - label: "Wait 4000ms"
+      cluster: "DelayCommands"
+      command: "WaitForMs"
+      arguments:
+          values:
+              - name: "ms"
+                value: 4000
+
+    - label: "Reads current level attribute from DUT"
+      PICS: LVL.S.C06.Rsp && LVL.S.A0000
       command: "readAttribute"
       attribute: "current level"
       response:
           value: CurrentlevelValue
 
     - label: "Reset level to 254"
+      PICS: LVL.S.C00.Rsp
       command: "MoveToLevel"
       arguments:
           values:
@@ -142,7 +145,3 @@ tests:
           values:
               - name: "ms"
                 value: 100
-
-    - label: "Sending off command"
-      cluster: "On/Off"
-      command: "off"

@@ -27,6 +27,10 @@ import base64
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import load_der_private_key
 
+# A user can not change the factory data version and must be coherent with
+# the factory data version set in the nRF Connect platform Kconfig file (CHIP_FACTORY_DATA_VERSION).
+FACTORY_DATA_VERSION = 1
+
 HEX_PREFIX = "hex:"
 PUB_KEY_PREFIX = b'\x04'
 INVALID_PASSCODES = [00000000, 11111111, 22222222, 33333333, 44444444,
@@ -162,6 +166,7 @@ class FactoryDataGenerator:
             sys.exit(-1)
         with json_file:
             # serialize data
+            self._add_entry("version", FACTORY_DATA_VERSION)
             self._add_entry("sn", self._args.sn)
             self._add_entry("vendor_id", self._args.vendor_id)
             self._add_entry("product_id", self._args.product_id)
@@ -217,7 +222,7 @@ class FactoryDataGenerator:
         """ If rotating device unique ID has not been provided it should be generated """
         log.warning("Can not find rotating device UID in provided arguments list. A new one will be generated.")
         rdu = secrets.token_bytes(16)
-        log.info("\n\nThe new rotate device UID: {}\n".format(rdu).hex())
+        log.info("\n\nThe new rotate device UID: {}\n".format(rdu.hex()))
         return rdu
 
     def _validate_output_json(self, output_json: str):
@@ -325,9 +330,6 @@ def main():
     optional_arguments.add_argument("--user", type=str,
                                     help="[string] Provide additional user-specific keys in Json format: {'name_1': 'value_1', 'name_2': 'value_2', ... 'name_n', 'value_n'}.")
     args = parser.parse_args()
-
-    if(args.chip_cert_path):
-        print("Generating DAC and PAI certificates is not supported yet")
 
     if args.verbose:
         log.basicConfig(format='[%(asctime)s][%(levelname)s] %(message)s', level=log.DEBUG)

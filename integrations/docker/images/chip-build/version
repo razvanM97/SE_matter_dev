@@ -1,1 +1,1 @@
-0.5.79 Version bump reason: [Ameba] Update ameba SDK to expose xPortResetHeapMinimumEverFreeHeapSize API
+0.5.84 Version bump reason: two more Yocto SDKs are to be integrated into the imx docker image

@@ -27,6 +27,10 @@
 
 #include <platform/Darwin/PosixConfig.h>
 
+#if CHIP_DEVICE_CONFIG_ENABLE_WIFI
+#include <platform/Darwin/WiFi/WiFiNetworkInfos.h>
+#endif // CHIP_DEVICE_CONFIG_ENABLE_WIFI
+
 namespace chip {
 namespace DeviceLayer {
 
@@ -41,8 +45,12 @@ public:
     CHIP_ERROR StoreVendorId(uint16_t vendorId);
     CHIP_ERROR StoreProductId(uint16_t productId);
 
-    CHIP_ERROR GetVendorId(uint16_t & vendorId) override;
-    CHIP_ERROR GetProductId(uint16_t & productId) override;
+#if CHIP_DEVICE_CONFIG_ENABLE_WIFI
+    CHIP_ERROR GetWiFiNetworkInformations(WiFiNetworkInfos & infos);
+    CHIP_ERROR StoreWiFiNetworkInformations(WiFiNetworkInfos & infos);
+    CHIP_ERROR ClearWiFiNetworkInformations();
+    bool HasWiFiNetworkInformations();
+#endif // CHIP_DEVICE_CONFIG_ENABLE_WIFI
 
     // This returns an instance of this class.
     static ConfigurationManagerImpl & GetDefaultInstance();

@@ -28,9 +28,8 @@ tests:
               - name: "nodeId"
                 value: nodeId
 
-    #Issue 17510
     - label: "Send Numbers1"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_KEYPADINPUT.S.NK
       command: "SendKey"
       arguments:
           values:
@@ -38,7 +37,7 @@ tests:
                 value: 0x21
 
     - label: "Send Numbers2"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_KEYPADINPUT.S.NK
       command: "SendKey"
       arguments:
           values:
@@ -46,7 +45,7 @@ tests:
                 value: 0x22
 
     - label: "Send Numbers3"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_KEYPADINPUT.S.NK
       command: "SendKey"
       arguments:
           values:
@@ -54,7 +53,7 @@ tests:
                 value: 0x23
 
     - label: "Send Numbers4"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_KEYPADINPUT.S.NK
       command: "SendKey"
       arguments:
           values:
@@ -62,7 +61,7 @@ tests:
                 value: 0x24
 
     - label: "Send Numbers5"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_KEYPADINPUT.S.NK
       command: "SendKey"
       arguments:
           values:
@@ -70,7 +69,7 @@ tests:
                 value: 0x25
 
     - label: "Send Numbers6"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_KEYPADINPUT.S.NK
       command: "SendKey"
       arguments:
           values:
@@ -78,7 +77,7 @@ tests:
                 value: 0x26
 
     - label: "Send Numbers7"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_KEYPADINPUT.S.NK
       command: "SendKey"
       arguments:
           values:
@@ -86,7 +85,7 @@ tests:
                 value: 0x27
 
     - label: "Send Numbers8"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_KEYPADINPUT.S.NK
       command: "SendKey"
       arguments:
           values:
@@ -94,7 +93,7 @@ tests:
                 value: 0x28
 
     - label: "Send Numbers9"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_KEYPADINPUT.S.NK
       command: "SendKey"
       arguments:
           values:

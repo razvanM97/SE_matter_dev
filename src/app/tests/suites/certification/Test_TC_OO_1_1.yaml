@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: 3.1.1. [TC-OO-1] Global attributes with server as DUT
+name: 4.1.1. [TC-OO-1.1] Global attributes with server as DUT
 
 config:
     nodeId: 0x12344321
@@ -36,30 +36,34 @@ tests:
           constraints:
               type: uint16
 
-    #issue 17495
+    - label: "read the optional global attribute: FeatureMap"
+      command: "readAttribute"
+      attribute: "FeatureMap"
+      PICS: OO_LT
+      response:
+          value: 1
+          constraints:
+              type: map32
+
     - label: "Read the global attribute: AttributeList"
-      PICS: PICS_SKIP_SAMPLE_APP
       command: "readAttribute"
       attribute: "AttributeList"
       response:
-          value: [0, 16384, 16385, 16386, 16387]
           constraints:
               type: list
-
-    - label:
-          "Read EventList attribute from the DUT and Verify that the DUT
-          response provides a list of supported events."
-      verification: |
-          Not implemented in chip-tool
-      cluster: "LogCommands"
-      command: "UserPrompt"
-      PICS: PICS_USER_PROMPT
-      arguments:
-          values:
-              - name: "message"
-                value: "Please enter 'y' for success"
-              - name: "expectedValue"
-                value: "y"
+              contains:
+                  [
+                      0,
+                      16384,
+                      16385,
+                      16386,
+                      16387,
+                      65528,
+                      65529,
+                      65531,
+                      65532,
+                      65533,
+                  ]
 
     - label: "Read the global attribute: AcceptedCommandList"
       command: "readAttribute"
@@ -78,11 +82,17 @@ tests:
           constraints:
               type: list
 
-    - label: "read the optional global attribute: FeatureMap"
-      command: "readAttribute"
-      attribute: "FeatureMap"
-      PICS: OO_LT
-      response:
-          value: 1
-          constraints:
-              type: map32
+    - label:
+          "Read EventList attribute from the DUT and Verify that the DUT
+          response provides a list of supported events."
+      verification: |
+          Not implemented in chip-tool
+      cluster: "LogCommands"
+      command: "UserPrompt"
+      PICS: PICS_USER_PROMPT
+      arguments:
+          values:
+              - name: "message"
+                value: "Please enter 'y' for success"
+              - name: "expectedValue"
+                value: "y"

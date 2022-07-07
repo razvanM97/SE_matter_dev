@@ -35,15 +35,15 @@ tests:
                 value: nodeId
 
     - label: "Reads the CurrentTarget attribute"
+      PICS: MC_TGTNAV.S.A0001
       command: "readAttribute"
       attribute: "CurrentTarget"
       response:
           constraints:
               type: uint8
 
-    #Below steps disabled due to issue- #13029
-    #Disabled due to issue - #13087
     - label: "Reads the TargetList attribute"
+      PICS: MC_TGTNAV.S.A0000
       command: "readAttribute"
       attribute: "TargetList"
       response:
@@ -51,49 +51,17 @@ tests:
           constraints:
               type: list
 
-    #Issue 18205
     - label: "Sends a NavigateTarget command"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_TGTNAV.S.C0000
       command: "NavigateTarget"
       arguments:
           values:
               - name: "Target"
                 value: targetvalue1
-      response:
-          values:
-              - name: "status"
-                value: 0
 
     - label: "Reads the CurrentTarget attribute"
-      PICS: PICS_SKIP_SAMPLE_APP
+      PICS: MC_TGTNAV.S.A0001
       command: "readAttribute"
       attribute: "CurrentTarget"
       response:
           value: targetvalue1
-
-    - label: "Reads the TargetList attribute"
-      command: "readAttribute"
-      attribute: "TargetList"
-      response:
-          constraints:
-              type: list
-
-    #Issue 18205
-    - label: "Sends a NavigateTarget command"
-      PICS: PICS_SKIP_SAMPLE_APP
-      command: "NavigateTarget"
-      arguments:
-          values:
-              - name: "Target"
-                value: targetvalue2
-      response:
-          values:
-              - name: "status"
-                value: 0
-
-    - label: "Reads the CurrentTarget attribute"
-      PICS: PICS_SKIP_SAMPLE_APP
-      command: "readAttribute"
-      attribute: "CurrentTarget"
-      response:
-          value: targetvalue2

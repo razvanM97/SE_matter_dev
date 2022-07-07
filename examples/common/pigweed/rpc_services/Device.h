@@ -223,6 +223,7 @@ public:
 
     virtual pw::Status TriggerOta(const pw_protobuf_Empty & request, pw_protobuf_Empty & response)
     {
+#if CONFIG_CHIP_OTA_REQUESTOR
         chip::DeviceLayer::PlatformMgr().ScheduleWork(
             [](intptr_t) {
                 chip::OTARequestorInterface * requestor = chip::GetRequestorInstance();
@@ -237,6 +238,10 @@ public:
             },
             reinterpret_cast<intptr_t>(nullptr));
         return pw::OkStatus();
+#else
+        ChipLogError(AppServer, "Trigger OTA requested, but OTA requestor not compiled in.");
+        return pw::Status::Unimplemented();
+#endif
     }
 
     virtual pw::Status SetPairingState(const chip_rpc_PairingState & request, pw_protobuf_Empty & response)
@@ -265,6 +270,7 @@ public:
         DeviceLayer::GetDiagnosticDataProvider().GetUpTime(time_since_boot_sec);
         response.time_since_boot_millis = time_since_boot_sec * 1000;
         size_t count                    = 0;
+        DeviceLayer::StackLock lock;
         for (const FabricInfo & fabricInfo : Server::GetInstance().GetFabricTable())
         {
             if (count < ArraySize(response.fabric_info))
@@ -282,7 +288,7 @@ public:
     {
 
         uint16_t vendor_id;
-        if (DeviceLayer::ConfigurationMgr().GetVendorId(vendor_id) == CHIP_NO_ERROR)
+        if (DeviceLayer::GetDeviceInstanceInfoProvider()->GetVendorId(vendor_id) == CHIP_NO_ERROR)
         {
             response.vendor_id = static_cast<uint32_t>(vendor_id);
         }
@@ -292,7 +298,7 @@ public:
         }
 
         uint16_t product_id;
-        if (DeviceLayer::ConfigurationMgr().GetProductId(product_id) == CHIP_NO_ERROR)
+        if (DeviceLayer::GetDeviceInstanceInfoProvider()->GetProductId(product_id) == CHIP_NO_ERROR)
         {
             response.product_id = static_cast<uint32_t>(product_id);
         }
@@ -311,6 +317,13 @@ public:
             response.software_version = CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION;
         }
 
+        if (DeviceLayer::ConfigurationMgr().GetSoftwareVersionString(response.software_version_string,
+                                                                     sizeof(response.software_version_string)) != CHIP_NO_ERROR)
+        {
+            snprintf(response.software_version_string, sizeof(response.software_version_string),
+                     CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION_STRING);
+        }
+
         uint32_t code;
         if (DeviceLayer::GetCommissionableDataProvider()->GetSetupPasscode(code) == CHIP_NO_ERROR)
         {
@@ -325,7 +338,7 @@ public:
             response.has_pairing_info           = true;
         }
 
-        if (DeviceLayer::GetDeviceInstanceInfoProvider()->GetSerialNumber(response.serial_number, sizeof(response.serial_number)) ==
+        if (DeviceLayer::GetDeviceInstanceInfoProvider()->GetSerialNumber(response.serial_number, sizeof(response.serial_number)) !=
             CHIP_NO_ERROR)
         {
             snprintf(response.serial_number, sizeof(response.serial_number), CHIP_DEVICE_CONFIG_TEST_SERIAL_NUMBER);
