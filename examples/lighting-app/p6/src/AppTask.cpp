@@ -38,6 +38,7 @@
 #include <setup_payload/QRCodeSetupPayloadGenerator.h>
 #include <setup_payload/SetupPayload.h>
 
+#include <DeviceInfoProviderImpl.h>
 #include <app/clusters/network-commissioning/network-commissioning.h>
 #include <platform/P6/NetworkCommissioningDriver.h>
 
@@ -48,9 +49,7 @@
 #include <app/clusters/ota-requestor/DefaultOTARequestorDriver.h>
 #include <app/clusters/ota-requestor/DefaultOTARequestorStorage.h>
 #include <platform/P6/OTAImageProcessorImpl.h>
-extern "C" {
-#include "cy_smif_psoc6.h"
-}
+
 using chip::BDXDownloader;
 using chip::CharSpan;
 using chip::DefaultOTARequestor;
@@ -58,7 +57,7 @@ using chip::FabricIndex;
 using chip::GetRequestorInstance;
 using chip::NodeId;
 using chip::OTADownloader;
-using chip::OTAImageProcessorImpl;
+using chip::DeviceLayer::OTAImageProcessorImpl;
 using chip::System::Layer;
 
 using namespace ::chip;
@@ -68,8 +67,7 @@ using namespace ::chip::DeviceLayer;
 using namespace ::chip::System;
 
 #endif
-#define FACTORY_RESET_TRIGGER_TIMEOUT 3000
-#define FACTORY_RESET_CANCEL_WINDOW_TIMEOUT 3000
+#define FACTORY_RESET_CANCEL_WINDOW_TIMEOUT 5000
 #define APP_TASK_STACK_SIZE (4096)
 #define APP_TASK_PRIORITY 2
 #define APP_EVENT_QUEUE_SIZE 10
@@ -110,6 +108,7 @@ using namespace ::chip::Credentials;
 using namespace ::chip::DeviceLayer;
 
 AppTask AppTask::sAppTask;
+static chip::DeviceLayer::DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 
 namespace {
 app::Clusters::NetworkCommissioning::Instance
@@ -127,6 +126,9 @@ static void InitServer(intptr_t context)
     static chip::CommonCaseDeviceServerInitParams initParams;
     (void) initParams.InitializeStaticResourcesBeforeServerInit();
     chip::Server::GetInstance().Init(initParams);
+
+    gExampleDeviceInfoProvider.SetStorageDelegate(&Server::GetInstance().GetPersistentStorage());
+    chip::DeviceLayer::SetDeviceInfoProvider(&gExampleDeviceInfoProvider);
 
     // Initialize device attestation config
     SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
@@ -364,27 +366,7 @@ void AppTask::FunctionTimerEventHandler(AppEvent * event)
         return;
     }
 
-    // If we reached here, the button was held past FACTORY_RESET_TRIGGER_TIMEOUT,
-    // initiate factory reset
-    if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kStartBleAdv)
-    {
-        P6_LOG("Factory Reset Triggered. Release button within %ums to cancel.", FACTORY_RESET_CANCEL_WINDOW_TIMEOUT);
-
-        // Start timer for FACTORY_RESET_CANCEL_WINDOW_TIMEOUT to allow user to
-        // cancel, if required.
-        sAppTask.StartTimer(FACTORY_RESET_CANCEL_WINDOW_TIMEOUT);
-
-        sAppTask.mFunction = Function::kFactoryReset;
-
-        // Turn off all LEDs before starting blink to make sure blink is
-        // co-ordinated.
-        sStatusLED.Set(false);
-        sLightLED.Set(false);
-
-        sStatusLED.Blink(500);
-        sLightLED.Blink(500);
-    }
-    else if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)
+    if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)
     {
         // Actually trigger Factory Reset
         sAppTask.mFunction = Function::kNoneSelected;
@@ -394,28 +376,24 @@ void AppTask::FunctionTimerEventHandler(AppEvent * event)
 
 void AppTask::FunctionHandler(AppEvent * event)
 {
-    // To trigger software update: press the APP_FUNCTION_BUTTON button briefly (<
-    // FACTORY_RESET_TRIGGER_TIMEOUT) To initiate factory reset: press the
-    // APP_FUNCTION_BUTTON for FACTORY_RESET_TRIGGER_TIMEOUT +
-    // FACTORY_RESET_CANCEL_WINDOW_TIMEOUT All LEDs start blinking after
-    // FACTORY_RESET_TRIGGER_TIMEOUT to signal factory reset has been initiated.
-    // To cancel factory reset: release the APP_FUNCTION_BUTTON once all LEDs
-    // start blinking within the FACTORY_RESET_CANCEL_WINDOW_TIMEOUT
-    if (event->ButtonEvent.Action == APP_BUTTON_RELEASED)
+    if (event->ButtonEvent.Action == APP_BUTTON_PRESSED)
     {
         if (!sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kNoneSelected)
         {
-            sAppTask.StartTimer(FACTORY_RESET_TRIGGER_TIMEOUT);
-            sAppTask.mFunction = Function::kStartBleAdv;
-        }
-    }
-    else
-    {
-        // If the button was released before factory reset got initiated, start Thread Network
-        if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kStartBleAdv)
-        {
-            sAppTask.CancelTimer();
-            sAppTask.mFunction = Function::kNoneSelected;
+            P6_LOG("Factory Reset Triggered. Press button again within %us to cancel.", FACTORY_RESET_CANCEL_WINDOW_TIMEOUT / 1000);
+            // Start timer for FACTORY_RESET_CANCEL_WINDOW_TIMEOUT to allow user to
+            // cancel, if required.
+            sAppTask.StartTimer(FACTORY_RESET_CANCEL_WINDOW_TIMEOUT);
+
+            sAppTask.mFunction = Function::kFactoryReset;
+
+            // Turn off all LEDs before starting blink to make sure blink is
+            // co-ordinated.
+            sStatusLED.Set(false);
+            sLightLED.Set(false);
+
+            sStatusLED.Blink(500);
+            sLightLED.Blink(500);
         }
         else if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)
         {
@@ -572,35 +550,16 @@ void AppTask::UpdateClusterState(intptr_t context)
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
 void AppTask::InitOTARequestor()
 {
-    CHIP_ERROR err = CHIP_NO_ERROR;
     SetRequestorInstance(&gRequestorCore);
+    ConfigurationMgr().StoreSoftwareVersion(CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION);
     gRequestorStorage.Init(chip::Server::GetInstance().GetPersistentStorage());
     gRequestorCore.Init(chip::Server::GetInstance(), gRequestorStorage, gRequestorUser, gDownloader);
     gImageProcessor.SetOTADownloader(&gDownloader);
     gDownloader.SetImageProcessorDelegate(&gImageProcessor);
+
     gRequestorUser.Init(&gRequestorCore, &gImageProcessor);
 
-    uint32_t savedSoftwareVersion;
-    err = ConfigurationMgr().GetSoftwareVersion(savedSoftwareVersion);
-    if (err != CHIP_NO_ERROR)
-    {
-        P6_LOG("Can't get saved software version");
-        appError(err);
-    }
-
-    if (savedSoftwareVersion != CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION)
-    {
-        ConfigurationMgr().StoreSoftwareVersion(CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION);
-
-        P6_LOG("Confirming update to version: %u", CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION);
-        chip::OTARequestorInterface * requestor = chip::GetRequestorInstance();
-        if (requestor != nullptr)
-        {
-            requestor->NotifyUpdateApplied();
-        }
-    }
-
     P6_LOG("Current Software Version: %u", CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION);
-    P6_LOG("Current Firmware Version String: %s", CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION_STRING);
+    P6_LOG("Current Software Version String: %s", CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION_STRING);
 }
 #endif

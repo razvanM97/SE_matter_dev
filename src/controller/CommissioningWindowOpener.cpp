@@ -72,6 +72,11 @@ CHIP_ERROR CommissioningWindowOpener::OpenCommissioningWindow(NodeId deviceId, S
 
     if (setupPIN.HasValue())
     {
+        if (!SetupPayload::IsValidSetupPIN(setupPIN.Value()))
+        {
+            return CHIP_ERROR_INVALID_ARGUMENT;
+        }
+
         mCommissioningWindowOption = CommissioningWindowOption::kTokenWithProvidedPIN;
         mSetupPayload.setUpPINCode = setupPIN.Value();
     }
@@ -91,9 +96,9 @@ CHIP_ERROR CommissioningWindowOpener::OpenCommissioningWindow(NodeId deviceId, S
         mPBKDFSalt = ByteSpan(mPBKDFSaltBuffer);
     }
 
-    mSetupPayload.version               = 0;
-    mSetupPayload.discriminator         = discriminator;
-    mSetupPayload.rendezvousInformation = RendezvousInformationFlags(RendezvousInformationFlag::kOnNetwork);
+    mSetupPayload.version = 0;
+    mSetupPayload.discriminator.SetLongValue(discriminator);
+    mSetupPayload.rendezvousInformation.SetValue(RendezvousInformationFlag::kOnNetwork);
 
     mCommissioningWindowCallback      = callback;
     mBasicCommissioningWindowCallback = nullptr;
@@ -119,14 +124,14 @@ CHIP_ERROR CommissioningWindowOpener::OpenCommissioningWindow(NodeId deviceId, S
     return mController->GetConnectedDevice(mNodeId, &mDeviceConnected, &mDeviceConnectionFailure);
 }
 
-CHIP_ERROR CommissioningWindowOpener::OpenCommissioningWindowInternal(OperationalDeviceProxy * device)
+CHIP_ERROR CommissioningWindowOpener::OpenCommissioningWindowInternal(Messaging::ExchangeManager & exchangeMgr,
+                                                                      SessionHandle & sessionHandle)
 {
     ChipLogProgress(Controller, "OpenCommissioningWindow for device ID %" PRIu64, mNodeId);
 
     constexpr EndpointId kAdministratorCommissioningClusterEndpoint = 0;
 
-    AdministratorCommissioningCluster cluster(*device->GetExchangeManager(), device->GetSecureSession().Value(),
-                                              kAdministratorCommissioningClusterEndpoint);
+    AdministratorCommissioningCluster cluster(exchangeMgr, sessionHandle, kAdministratorCommissioningClusterEndpoint);
 
     if (mCommissioningWindowOption != CommissioningWindowOption::kOriginalSetupCode)
     {
@@ -137,7 +142,7 @@ CHIP_ERROR CommissioningWindowOpener::OpenCommissioningWindowInternal(Operationa
         AdministratorCommissioning::Commands::OpenCommissioningWindow::Type request;
         request.commissioningTimeout = mCommissioningWindowTimeout.count();
         request.PAKEVerifier         = serializedVerifierSpan;
-        request.discriminator        = mSetupPayload.discriminator;
+        request.discriminator        = mSetupPayload.discriminator.GetLongValue();
         request.iterations           = mPBKDFIterations;
         request.salt                 = mPBKDFSalt;
 
@@ -249,7 +254,8 @@ void CommissioningWindowOpener::OnOpenCommissioningWindowFailure(void * context,
     }
 }
 
-void CommissioningWindowOpener::OnDeviceConnectedCallback(void * context, OperationalDeviceProxy * device)
+void CommissioningWindowOpener::OnDeviceConnectedCallback(void * context, Messaging::ExchangeManager & exchangeMgr,
+                                                          SessionHandle & sessionHandle)
 {
     auto * self = static_cast<CommissioningWindowOpener *>(context);
 
@@ -262,7 +268,7 @@ void CommissioningWindowOpener::OnDeviceConnectedCallback(void * context, Operat
     {
     case Step::kReadVID: {
         constexpr EndpointId kBasicClusterEndpoint = 0;
-        BasicCluster cluster(*device->GetExchangeManager(), device->GetSecureSession().Value(), kBasicClusterEndpoint);
+        BasicCluster cluster(exchangeMgr, sessionHandle, kBasicClusterEndpoint);
         err = cluster.ReadAttribute<app::Clusters::Basic::Attributes::VendorID::TypeInfo>(context, OnVIDReadResponse,
                                                                                           OnVIDPIDReadFailureResponse);
 #if CHIP_ERROR_LOGGING
@@ -272,7 +278,7 @@ void CommissioningWindowOpener::OnDeviceConnectedCallback(void * context, Operat
     }
     case Step::kReadPID: {
         constexpr EndpointId kBasicClusterEndpoint = 0;
-        BasicCluster cluster(*device->GetExchangeManager(), device->GetSecureSession().Value(), kBasicClusterEndpoint);
+        BasicCluster cluster(exchangeMgr, sessionHandle, kBasicClusterEndpoint);
         err = cluster.ReadAttribute<app::Clusters::Basic::Attributes::ProductID::TypeInfo>(context, OnPIDReadResponse,
                                                                                            OnVIDPIDReadFailureResponse);
 #if CHIP_ERROR_LOGGING
@@ -281,7 +287,7 @@ void CommissioningWindowOpener::OnDeviceConnectedCallback(void * context, Operat
         break;
     }
     case Step::kOpenCommissioningWindow: {
-        err = self->OpenCommissioningWindowInternal(device);
+        err = self->OpenCommissioningWindowInternal(exchangeMgr, sessionHandle);
 #if CHIP_ERROR_LOGGING
         messageIfError = "Could not connect to open commissioning window";
 #endif // CHIP_ERROR_LOGGING
@@ -303,7 +309,7 @@ void CommissioningWindowOpener::OnDeviceConnectedCallback(void * context, Operat
     }
 }
 
-void CommissioningWindowOpener::OnDeviceConnectionFailureCallback(void * context, PeerId peerId, CHIP_ERROR error)
+void CommissioningWindowOpener::OnDeviceConnectionFailureCallback(void * context, const ScopedNodeId & peerId, CHIP_ERROR error)
 {
     OnOpenCommissioningWindowFailure(context, error);
 }

@@ -32,6 +32,8 @@
 #include <app/EventManagement.h>
 #include <app/EventPathParams.h>
 #include <app/MessageDef/AttributePathIBs.h>
+#include <app/MessageDef/DataVersionFilterIBs.h>
+#include <app/MessageDef/EventFilterIBs.h>
 #include <app/MessageDef/EventPathIBs.h>
 #include <app/ObjectList.h>
 #include <lib/core/CHIPCore.h>
@@ -39,7 +41,7 @@
 #include <lib/support/CodeUtils.h>
 #include <lib/support/DLLUtil.h>
 #include <lib/support/logging/CHIPLogging.h>
-#include <messaging/ExchangeContext.h>
+#include <messaging/ExchangeHolder.h>
 #include <messaging/ExchangeMgr.h>
 #include <messaging/Flags.h>
 #include <protocols/Protocols.h>
@@ -240,7 +242,7 @@ private:
      *  @retval #CHIP_NO_ERROR On success.
      *
      */
-    CHIP_ERROR OnInitialRequest(System::PacketBufferHandle && aPayload);
+    void OnInitialRequest(System::PacketBufferHandle && aPayload);
 
     /**
      *  Send ReportData to initiator
@@ -354,20 +356,8 @@ private:
         AwaitingDestruction,    ///< The object has completed its work and is awaiting destruction by the application.
     };
 
-    /*
-     * This forcibly closes the exchange context if a valid one is pointed to. Such a situation does
-     * not arise during normal message processing flows that all normally call Close() above.
-     *
-     * This will eventually call Close() to drive the process of eventually releasing this object (unless called from the
-     * destructor).
-     *
-     * This is only called by a very narrow set of external objects as needed.
-     */
-    void Abort(bool aCalledFromDestructor = false);
-
     /**
-     * Called internally to signal the completion of all work on this object, gracefully close the
-     * exchange and finally, signal to a registerd callback that it's
+     * Called internally to signal the completion of all work on this objecta and signal to a registered callback that it's
      * safe to release this object.
      */
     void Close();
@@ -381,12 +371,11 @@ private:
     CHIP_ERROR ProcessAttributePathList(AttributePathIBs::Parser & aAttributePathListParser);
     CHIP_ERROR ProcessEventPaths(EventPathIBs::Parser & aEventPathsParser);
     CHIP_ERROR ProcessEventFilters(EventFilterIBs::Parser & aEventFiltersParser);
-    CHIP_ERROR OnStatusResponse(Messaging::ExchangeContext * apExchangeContext, System::PacketBufferHandle && aPayload);
+    CHIP_ERROR OnStatusResponse(Messaging::ExchangeContext * apExchangeContext, System::PacketBufferHandle && aPayload,
+                                bool & aSendStatusResponse);
     CHIP_ERROR OnMessageReceived(Messaging::ExchangeContext * apExchangeContext, const PayloadHeader & aPayloadHeader,
                                  System::PacketBufferHandle && aPayload) override;
     void OnResponseTimeout(Messaging::ExchangeContext * apExchangeContext) override;
-    CHIP_ERROR OnUnknownMsgType(Messaging::ExchangeContext * apExchangeContext, const PayloadHeader & aPayloadHeader,
-                                System::PacketBufferHandle && aPayload);
     void MoveToState(const HandlerState aTargetState);
 
     const char * GetStateStr() const;
@@ -445,7 +434,7 @@ private:
     // TODO: We should shutdown the transaction when the session expires.
     SessionHolder mSessionHandle;
 
-    Messaging::ExchangeContext * mpExchangeCtx = nullptr;
+    Messaging::ExchangeHolder mExchangeCtx;
 
     ObjectList<AttributePathParams> * mpAttributePathList   = nullptr;
     ObjectList<EventPathParams> * mpEventPathList           = nullptr;

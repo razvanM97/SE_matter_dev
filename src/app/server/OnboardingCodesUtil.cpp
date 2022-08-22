@@ -98,9 +98,9 @@ void ShareQRCodeOverNFC(chip::RendezvousInformationFlags aRendezvousFlags)
 
 CHIP_ERROR GetPayloadContents(chip::PayloadContents & aPayload, chip::RendezvousInformationFlags aRendezvousFlags)
 {
-    CHIP_ERROR err                 = CHIP_NO_ERROR;
-    aPayload.version               = 0;
-    aPayload.rendezvousInformation = aRendezvousFlags;
+    CHIP_ERROR err   = CHIP_NO_ERROR;
+    aPayload.version = 0;
+    aPayload.rendezvousInformation.SetValue(aRendezvousFlags);
 
     err = GetCommissionableDataProvider()->GetSetupPasscode(aPayload.setUpPINCode);
     if (err != CHIP_NO_ERROR)
@@ -115,13 +115,15 @@ CHIP_ERROR GetPayloadContents(chip::PayloadContents & aPayload, chip::Rendezvous
 #endif
     }
 
-    err = GetCommissionableDataProvider()->GetSetupDiscriminator(aPayload.discriminator);
+    uint16_t discriminator = 0;
+    err                    = GetCommissionableDataProvider()->GetSetupDiscriminator(discriminator);
     if (err != CHIP_NO_ERROR)
     {
         ChipLogError(AppServer, "GetCommissionableDataProvider()->GetSetupDiscriminator() failed: %" CHIP_ERROR_FORMAT,
                      err.Format());
         return err;
     }
+    aPayload.discriminator.SetLongValue(discriminator);
 
     err = chip::DeviceLayer::GetDeviceInstanceInfoProvider()->GetVendorId(aPayload.vendorID);
     if (err != CHIP_NO_ERROR)

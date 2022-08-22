@@ -1,0 +1,358 @@
+# Copyright (c) 2021 Project CHIP Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# Auto-generated scripts for harness use only, please review before automation. The endpoints and cluster names are currently set to default
+
+name: 113.1.1. [TC-DRLK-1.1] Global Attributes [DUT-Server]
+
+PICS:
+    - DRLK.S
+
+config:
+    nodeId: 0x12344321
+    cluster: "Door Lock"
+    endpoint: 1
+
+tests:
+    - label: "Wait for the commissioned device to be retrieved"
+      cluster: "DelayCommands"
+      command: "WaitForCommissionee"
+      arguments:
+          values:
+              - name: "nodeId"
+                value: nodeId
+
+    - label: "TH reads the ClusterRevision from DUT"
+      command: "readAttribute"
+      attribute: "ClusterRevision"
+      response:
+          value: 6
+          constraints:
+              type: int16u
+
+    - label: "TH reads the FeatureMap from DUT"
+      PICS:
+          DRLK.S.F00 || DRLK.S.F01 || DRLK.S.F02 || DRLK.S.F04 || DRLK.S.F05 ||
+          DRLK.S.F06 || DRLK.S.F07 || DRLK.S.F08 || DRLK.S.F10 || DRLK.S.F11
+      command: "readAttribute"
+      attribute: "FeatureMap"
+      response:
+          constraints:
+              type: bitmap32
+              minValue: 0
+              maxValue: 4095
+
+    - label: "TH reads AttributeList from DUT"
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [0, 1, 2, 37, 38, 65528, 65529, 65531, 65532, 65533]
+
+    - label:
+          "TH reads Feature dependent(DRLK.S.F08) attributes in AttributeList"
+      PICS: DRLK.S.F08
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [17, 27, 28]
+
+    - label:
+          "TH reads Feature dependent(DRLK.S.F00) attributes in AttributeList"
+      PICS: DRLK.S.F00
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [18, 23, 24]
+
+    - label:
+          "TH reads Feature dependent(DRLK.S.F01) attributes in AttributeList"
+      PICS: DRLK.S.F01
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [19, 25, 26]
+
+    - label: "TH reads Feature dependent(DRLK.S.F04) attribute in AttributeList"
+      PICS: DRLK.S.F04
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [20]
+
+    - label: "TH reads Feature dependent(DRLK.S.F10) attribute in AttributeList"
+      PICS: DRLK.S.F10
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [21]
+
+    - label: "TH reads Feature dependent(DRLK.S.F11) attribute in AttributeList"
+      PICS: DRLK.S.F11
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [22]
+
+    - label:
+          "TH reads Feature dependent(DRLK.S.F00 or DRLK.S.F01) attributes in
+          AttributeList"
+      PICS: DRLK.S.F00 || DRLK.S.F01
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [48, 49]
+
+    - label:
+          "TH reads Feature dependent(DRLK.S.F07 or DRLK.S.F00) attribute in
+          AttributeList"
+      PICS: DRLK.S.F07 || DRLK.S.F00
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [51]
+
+    - label: "TH reads optional attribute(Language) in AttributeList"
+      PICS: DRLK.S.A0021
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [33]
+
+    - label: "TH reads optional attribute(LEDSettings) in AttributeList"
+      PICS: DRLK.S.A0022
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [34]
+
+    - label: "TH reads optional attribute(AutoRelockTime) in AttributeList"
+      PICS: DRLK.S.A0023
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [35]
+
+    - label: "TH reads optional attribute(SoundVolume) in AttributeList"
+      PICS: DRLK.S.A0024
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [36]
+
+    - label:
+          "TH reads optional attribute(DefaultConfigurationRegister) in
+          AttributeList"
+      PICS: DRLK.S.A0027
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [39]
+
+    - label:
+          "TH reads optional attribute(EnableLocalProgramming) in AttributeList"
+      PICS: DRLK.S.A0028
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [40]
+
+    - label:
+          "TH reads optional attribute(EnableOneTouchLocking) in AttributeList"
+      PICS: DRLK.S.A0029
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [41]
+
+    - label:
+          "TH reads optional attribute(EnableInsideStatusLED) in AttributeList"
+      PICS: DRLK.S.A002a
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [42]
+
+    - label:
+          "TH reads optional attribute(EnablePrivacyModeButton) in AttributeList"
+      PICS: DRLK.S.A002b
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [43]
+
+    - label:
+          "TH reads optional attribute(LocalProgrammingFeatures) in
+          AttributeList"
+      PICS: DRLK.S.A002c
+      command: "readAttribute"
+      attribute: "AttributeList"
+      response:
+          constraints:
+              type: list
+              contains: [44]
+
+    - label: "TH reads AcceptedCommandList from DUT"
+      command: "readAttribute"
+      attribute: "AcceptedCommandList"
+      response:
+          constraints:
+              type: list
+              contains: [0, 1]
+
+    - label:
+          "TH reads Feature dependent commands(DRLK.S.F04) in
+          AcceptedCommandList"
+      PICS: DRLK.S.F04
+      command: "readAttribute"
+      attribute: "AcceptedCommandList"
+      response:
+          constraints:
+              type: list
+              contains: [11, 12, 13]
+
+    - label:
+          "TH reads Feature dependent commands(DRLK.S.F10) in
+          AcceptedCommandList"
+      PICS: DRLK.S.F10
+      command: "readAttribute"
+      attribute: "AcceptedCommandList"
+      response:
+          constraints:
+              type: list
+              contains: [14, 15, 16]
+
+    - label:
+          "TH reads Feature dependent commands(DRLK.S.F11) in
+          AcceptedCommandList"
+      PICS: DRLK.S.F11
+      command: "readAttribute"
+      attribute: "AcceptedCommandList"
+      response:
+          constraints:
+              type: list
+              contains: [17, 18, 19]
+
+    - label:
+          "TH reads Feature dependent commands(DRLK.S.F08) in
+          AcceptedCommandList"
+      PICS: DRLK.S.F08
+      command: "readAttribute"
+      attribute: "AcceptedCommandList"
+      response:
+          constraints:
+              type: list
+              contains: [26, 27, 29, 34, 36, 38]
+
+    - label: "TH reads optional commands(DRLK.S.C03.Rsp) in AcceptedCommandList"
+      PICS: DRLK.S.C03.Rsp
+      command: "readAttribute"
+      attribute: "AcceptedCommandList"
+      response:
+          constraints:
+              type: list
+              contains: [3]
+
+    - label:
+          "TH reads Feature dependent command(DRLK.S.F04) in
+          GeneratedCommandList"
+      PICS: DRLK.S.F04
+      command: "readAttribute"
+      attribute: "GeneratedCommandList"
+      response:
+          constraints:
+              type: list
+              contains: [12]
+
+    - label:
+          "TH reads Feature dependent command(DRLK.S.F10) in
+          GeneratedCommandList"
+      PICS: DRLK.S.F10
+      command: "readAttribute"
+      attribute: "GeneratedCommandList"
+      response:
+          constraints:
+              type: list
+              contains: [15]
+
+    - label:
+          "TH reads Feature dependent command(DRLK.S.F11) in
+          GeneratedCommandList"
+      PICS: DRLK.S.F11
+      command: "readAttribute"
+      attribute: "GeneratedCommandList"
+      response:
+          constraints:
+              type: list
+              contains: [18]
+
+    - label:
+          "TH reads Feature dependent command(DRLK.S.F08) in
+          GeneratedCommandList"
+      PICS: DRLK.S.F08
+      command: "readAttribute"
+      attribute: "GeneratedCommandList"
+      response:
+          constraints:
+              type: list
+              contains: [28, 35]
+    #Commenting out the step EventList attribute which is out of scope for matter V1.0
+    #- label:
+    #      "Read EventList attribute from the DUT and Verify that the DUT
+    #      response provides a list of supported events."
+    #  verification: |
+    #      Not implemented in chip-tool
+    #  cluster: "LogCommands"
+    #  command: "UserPrompt"
+    #  PICS: PICS_USER_PROMPT
+    #  arguments:
+    #      values:
+    #          - name: "message"
+    #            value: "Please enter 'y' for success"
+    #          - name: "expectedValue"
+    #            value: "y"

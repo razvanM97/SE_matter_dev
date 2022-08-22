@@ -32,10 +32,13 @@ import time
 import ctypes
 import chip.clusters as Clusters
 import chip.clusters.Attribute as Attribute
+from chip.utils import CommissioningBuildingBlocks
 from chip.ChipStack import *
+import chip.native
 import chip.FabricAdmin
 import copy
 import secrets
+import faulthandler
 
 logger = logging.getLogger('PythonMatterControllerTEST')
 logger.setLevel(logging.INFO)
@@ -48,9 +51,27 @@ sh.setStream(sys.stdout)
 logger.addHandler(sh)
 
 
-def TestFail(message):
+def TestFail(message, doCrash=False):
     logger.fatal("Testfail: {}".format(message))
-    os._exit(1)
+
+    if (doCrash):
+        logger.fatal("--------------------------------")
+        logger.fatal("Backtrace of all Python threads:")
+        logger.fatal("--------------------------------")
+
+        #
+        # Let's dump the Python backtrace for all threads, since the backtrace we'll
+        # get from gdb (if one is attached) won't give us good Python symbol information.
+        #
+        faulthandler.dump_traceback()
+
+        #
+        # Cause a crash to happen so that we can actually get a meaningful
+        # backtrace when run through GDB.
+        #
+        chip.native.GetLibraryHandle().pychip_CauseCrash()
+    else:
+        os._exit(1)
 
 
 def FailIfNot(cond, message):
@@ -62,8 +83,6 @@ _configurable_tests = set()
 _configurable_test_sets = set()
 _enabled_tests = []
 _disabled_tests = []
-
-_UINT16_MAX = 65535
 
 
 def SetTestSet(enabled_tests, disabled_tests):
@@ -143,7 +162,7 @@ class TestTimeout(threading.Thread):
                 self._cv.wait(wait_time)
                 wait_time = stop_time - time.time()
         if time.time() > stop_time:
-            TestFail("Timeout")
+            TestFail("Timeout", doCrash=True)
 
 
 class TestResult:
@@ -171,9 +190,11 @@ class TestResult:
 
 class BaseTestHelper:
     def __init__(self, nodeid: int, paaTrustStorePath: str, testCommissioner: bool = False):
+        chip.native.Init()
+
         self.chipStack = ChipStack('/tmp/repl_storage.json')
-        self.fabricAdmin = chip.FabricAdmin.FabricAdmin(
-            fabricId=1, fabricIndex=1)
+        self.fabricAdmin = chip.FabricAdmin.FabricAdmin(vendorId=0XFFF1,
+                                                        fabricId=1, adminIndex=1)
         self.devCtrl = self.fabricAdmin.NewController(
             nodeid, paaTrustStorePath, testCommissioner)
         self.controllerNodeId = nodeid
@@ -363,107 +384,124 @@ class BaseTestHelper:
             return True
         return False
 
+    async def TestMultiControllerFabric(self, nodeid: int):
+        ''' This tests having multiple controller instances on the same fabric.
+        '''
+
+        # Create two new controllers on the same fabric with no privilege on the target node.
+        newControllers = await CommissioningBuildingBlocks.CreateControllersOnFabric(fabricAdmin=self.fabricAdmin, adminDevCtrl=self.devCtrl, controllerNodeIds=[100, 200], targetNodeId=nodeid, privilege=None)
+
+        #
+        # Read out the ACL list from one of the newly minted controllers which has no access. This should return an IM error.
+        #
+        res = await newControllers[0].ReadAttribute(nodeid=nodeid, attributes=[(0, Clusters.AccessControl.Attributes.Acl)])
+        if(res[0][Clusters.AccessControl][Clusters.AccessControl.Attributes.Acl].Reason.status != IM.Status.UnsupportedAccess):
+            self.logger.error(f"1: Received data instead of an error:{res}")
+            return False
+
+        #
+        # Read out the ACL list from an existing controller with admin privileges. This should return back valid data.
+        # Doing this ensures that we're not somehow aliasing the CASE sessions.
+        #
+        res = await self.devCtrl.ReadAttribute(nodeid=nodeid, attributes=[(0, Clusters.AccessControl.Attributes.Acl)])
+        if (type(res[0][Clusters.AccessControl][Clusters.AccessControl.Attributes.Acl][0]) != Clusters.AccessControl.Structs.AccessControlEntry):
+            self.logger.error(f"2: Received something other than data:{res}")
+            return False
+
+        #
+        # Re-do the previous read from the unprivileged controller just to do an ABA test to prove we haven't switched the CASE sessions
+        # under-neath.
+        #
+        res = await newControllers[0].ReadAttribute(nodeid=nodeid, attributes=[(0, Clusters.AccessControl.Attributes.Acl)])
+        if(res[0][Clusters.AccessControl][Clusters.AccessControl.Attributes.Acl].Reason.status != IM.Status.UnsupportedAccess):
+            self.logger.error(f"3: Received data instead of an error:{res}")
+            return False
+
+        #
+        # Grant the new controller admin privileges. Reading out the ACL cluster should now yield data.
+        #
+        await CommissioningBuildingBlocks.GrantPrivilege(adminCtrl=self.devCtrl, grantedCtrl=newControllers[0], privilege=Clusters.AccessControl.Enums.Privilege.kAdminister, targetNodeId=nodeid)
+        res = await newControllers[0].ReadAttribute(nodeid=nodeid, attributes=[(0, Clusters.AccessControl.Attributes.Acl)])
+        if (type(res[0][Clusters.AccessControl][Clusters.AccessControl.Attributes.Acl][0]) != Clusters.AccessControl.Structs.AccessControlEntry):
+            self.logger.error(f"4: Received something other than data:{res}")
+            return False
+
+        #
+        # Grant the second new controller admin privileges as well. Reading out the ACL cluster should now yield data.
+        #
+        await CommissioningBuildingBlocks.GrantPrivilege(adminCtrl=self.devCtrl, grantedCtrl=newControllers[1], privilege=Clusters.AccessControl.Enums.Privilege.kAdminister, targetNodeId=nodeid)
+        res = await newControllers[1].ReadAttribute(nodeid=nodeid, attributes=[(0, Clusters.AccessControl.Attributes.Acl)])
+        if (type(res[0][Clusters.AccessControl][Clusters.AccessControl.Attributes.Acl][0]) != Clusters.AccessControl.Structs.AccessControlEntry):
+            self.logger.error(f"5: Received something other than data:{res}")
+            return False
+
+        #
+        # Grant the second new controller just view privilege. Reading out the ACL cluster should return no data.
+        #
+        await CommissioningBuildingBlocks.GrantPrivilege(adminCtrl=self.devCtrl, grantedCtrl=newControllers[1], privilege=Clusters.AccessControl.Enums.Privilege.kView, targetNodeId=nodeid)
+        res = await newControllers[1].ReadAttribute(nodeid=nodeid, attributes=[(0, Clusters.AccessControl.Attributes.Acl)])
+        if(res[0][Clusters.AccessControl][Clusters.AccessControl.Attributes.Acl].Reason.status != IM.Status.UnsupportedAccess):
+            self.logger.error(f"6: Received data5 instead of an error:{res}")
+            return False
+
+        #
+        # Read the Basic cluster from the 2nd controller. This is possible with just view privileges.
+        #
+        res = await newControllers[1].ReadAttribute(nodeid=nodeid, attributes=[(0, Clusters.Basic.Attributes.ClusterRevision)])
+        if (type(res[0][Clusters.Basic][Clusters.Basic.Attributes.ClusterRevision]) != Clusters.Basic.Attributes.ClusterRevision.attribute_type.Type):
+            self.logger.error(f"7: Received something other than data:{res}")
+            return False
+
+        newControllers[0].Shutdown()
+        newControllers[1].Shutdown()
+
+        return True
+
     async def TestAddUpdateRemoveFabric(self, nodeid: int):
         logger.info("Testing AddNOC, UpdateNOC and RemoveFabric")
 
         self.logger.info("Waiting for attribute read for CommissionedFabrics")
         startOfTestFabricCount = await self._GetCommissonedFabricCount(nodeid)
 
-        tempFabric = chip.FabricAdmin.FabricAdmin(fabricId=3, fabricIndex=3)
+        tempFabric = chip.FabricAdmin.FabricAdmin(vendorId=0xFFF1)
         tempDevCtrl = tempFabric.NewController(self.controllerNodeId, self.paaTrustStorePath)
 
-        self.logger.info("Setting failsafe on CASE connection")
-        resp = await self.devCtrl.SendCommand(nodeid, 0, Clusters.GeneralCommissioning.Commands.ArmFailSafe(60), timedRequestTimeoutMs=1000)
-        if resp.errorCode is not Clusters.GeneralCommissioning.Enums.CommissioningError.kOk:
-            self.logger.error(
-                "Incorrect response received from arm failsafe - wanted OK, received {}".format(resp))
+        self.logger.info("Starting AddNOC using same node ID")
+        if not await CommissioningBuildingBlocks.AddNOCForNewFabricFromExisting(self.devCtrl, tempDevCtrl, nodeid, nodeid):
+            self.logger.error("AddNOC failed")
             return False
 
-        csrForAddNOC = await self.devCtrl.SendCommand(nodeid, 0, Clusters.OperationalCredentials.Commands.CSRRequest(CSRNonce=b'1' * 32))
-
-        chainForAddNOC = tempDevCtrl.IssueNOCChain(csrForAddNOC, nodeid)
-        if chainForAddNOC.rcacBytes is None or chainForAddNOC.icacBytes is None or chainForAddNOC.nocBytes is None or chainForAddNOC.ipkBytes is None:
-            self.logger.error("IssueNOCChain failed to generate valid cert chain for AddNOC")
-            return False
-
-        self.logger.info("Starting AddNOC portion of test")
-        # TODO error check on the commands below
-        await self.devCtrl.SendCommand(nodeid, 0, Clusters.OperationalCredentials.Commands.AddTrustedRootCertificate(chainForAddNOC.rcacBytes))
-        await self.devCtrl.SendCommand(nodeid, 0, Clusters.OperationalCredentials.Commands.AddNOC(chainForAddNOC.nocBytes, chainForAddNOC.icacBytes, chainForAddNOC.ipkBytes, tempDevCtrl.GetNodeId(), 0xFFF1))
-        await tempDevCtrl.SendCommand(nodeid, 0, Clusters.GeneralCommissioning.Commands.CommissioningComplete())
-
-        afterAddNocFabricCount = await self._GetCommissonedFabricCount(nodeid)
-        if startOfTestFabricCount == afterAddNocFabricCount:
+        expectedFabricCountUntilRemoveFabric = startOfTestFabricCount + 1
+        if expectedFabricCountUntilRemoveFabric != await self._GetCommissonedFabricCount(nodeid):
             self.logger.error("Expected commissioned fabric count to change after AddNOC")
             return False
 
-        resp = await tempDevCtrl.ReadAttribute(nodeid, [(Clusters.Basic.Attributes.ClusterRevision)])
-        clusterRevision = resp[0][Clusters.Basic][Clusters.Basic.Attributes.ClusterRevision]
-        if not isinstance(clusterRevision, chip.tlv.uint) or clusterRevision < 1 or clusterRevision > _UINT16_MAX:
-            self.logger.error(
-                "Failed to read valid cluster revision on newly added fabric {}".format(resp))
-            return False
-
         self.logger.info("Starting UpdateNOC using same node ID")
-        resp = await tempDevCtrl.SendCommand(nodeid, 0, Clusters.GeneralCommissioning.Commands.ArmFailSafe(600), timedRequestTimeoutMs=1000)
-        if resp.errorCode is not Clusters.GeneralCommissioning.Enums.CommissioningError.kOk:
-            self.logger.error(
-                "Incorrect response received from arm failsafe - wanted OK, received {}".format(resp))
-            return False
-        csrForUpdateNOC = await tempDevCtrl.SendCommand(
-            nodeid, 0, Clusters.OperationalCredentials.Commands.CSRRequest(CSRNonce=b'1' * 32, isForUpdateNOC=True))
-        chainForUpdateNOC = tempDevCtrl.IssueNOCChain(csrForUpdateNOC, nodeid)
-        if chainForUpdateNOC.rcacBytes is None or chainForUpdateNOC.icacBytes is None or chainForUpdateNOC.nocBytes is None or chainForUpdateNOC.ipkBytes is None:
-            self.logger.error("IssueNOCChain failed to generate valid cert chain for UpdateNOC")
+        if not await CommissioningBuildingBlocks.UpdateNOC(tempDevCtrl, nodeid, nodeid):
+            self.logger.error("UpdateNOC using same node ID failed")
             return False
 
-        await tempDevCtrl.SendCommand(nodeid, 0, Clusters.OperationalCredentials.Commands.UpdateNOC(chainForUpdateNOC.nocBytes, chainForUpdateNOC.icacBytes))
-        await tempDevCtrl.SendCommand(nodeid, 0, Clusters.GeneralCommissioning.Commands.CommissioningComplete())
-        afterUpdateNocFabricCount = await self._GetCommissonedFabricCount(nodeid)
-        if afterUpdateNocFabricCount != afterAddNocFabricCount:
+        if expectedFabricCountUntilRemoveFabric != await self._GetCommissonedFabricCount(nodeid):
             self.logger.error("Expected commissioned fabric count to remain unchanged after UpdateNOC")
             return False
 
-        resp = await tempDevCtrl.ReadAttribute(nodeid, [(Clusters.Basic.Attributes.ClusterRevision)])
-        clusterRevision = resp[0][Clusters.Basic][Clusters.Basic.Attributes.ClusterRevision]
-        if not isinstance(clusterRevision, chip.tlv.uint) or clusterRevision < 1 or clusterRevision > _UINT16_MAX:
-            self.logger.error(
-                "Failed to read valid cluster revision on after UpdateNOC {}".format(resp))
-            return False
-
         self.logger.info("Starting UpdateNOC using different node ID")
-        resp = await tempDevCtrl.SendCommand(nodeid, 0, Clusters.GeneralCommissioning.Commands.ArmFailSafe(600), timedRequestTimeoutMs=1000)
-        if resp.errorCode is not Clusters.GeneralCommissioning.Enums.CommissioningError.kOk:
-            self.logger.error(
-                "Incorrect response received from arm failsafe - wanted OK, received {}".format(resp))
-            return False
-        csrForUpdateNOC = await tempDevCtrl.SendCommand(
-            nodeid, 0, Clusters.OperationalCredentials.Commands.CSRRequest(CSRNonce=b'1' * 32, isForUpdateNOC=True))
-
         newNodeIdForUpdateNoc = nodeid + 1
-        chainForSecondUpdateNOC = tempDevCtrl.IssueNOCChain(csrForUpdateNOC, newNodeIdForUpdateNoc)
-        if chainForSecondUpdateNOC.rcacBytes is None or chainForSecondUpdateNOC.icacBytes is None or chainForSecondUpdateNOC.nocBytes is None or chainForSecondUpdateNOC.ipkBytes is None:
-            self.logger.error("IssueNOCChain failed to generate valid cert chain for UpdateNOC with new node ID")
+        if not await CommissioningBuildingBlocks.UpdateNOC(tempDevCtrl, nodeid, newNodeIdForUpdateNoc):
+            self.logger.error("UpdateNOC using different node ID failed")
             return False
-        updateNocResponse = await tempDevCtrl.SendCommand(nodeid, 0, Clusters.OperationalCredentials.Commands.UpdateNOC(chainForSecondUpdateNOC.nocBytes, chainForSecondUpdateNOC.icacBytes))
-        await tempDevCtrl.SendCommand(newNodeIdForUpdateNoc, 0, Clusters.GeneralCommissioning.Commands.CommissioningComplete())
-        afterUpdateNocWithNewNodeIdFabricCount = await self._GetCommissonedFabricCount(nodeid)
-        if afterUpdateNocFabricCount != afterUpdateNocWithNewNodeIdFabricCount:
+
+        if expectedFabricCountUntilRemoveFabric != await self._GetCommissonedFabricCount(nodeid):
             self.logger.error("Expected commissioned fabric count to remain unchanged after UpdateNOC with new node ID")
             return False
 
         # TODO Read using old node ID and expect that it fails.
-        resp = await tempDevCtrl.ReadAttribute(newNodeIdForUpdateNoc, [(Clusters.Basic.Attributes.ClusterRevision)])
-        clusterRevision = resp[0][Clusters.Basic][Clusters.Basic.Attributes.ClusterRevision]
-        if not isinstance(clusterRevision, chip.tlv.uint) or clusterRevision < 1 or clusterRevision > _UINT16_MAX:
-            self.logger.error(
-                "Failed to read valid cluster revision on after UpdateNOC with new node ID {}".format(resp))
-            return False
 
-        removeFabricResponse = await tempDevCtrl.SendCommand(newNodeIdForUpdateNoc, 0, Clusters.OperationalCredentials.Commands.RemoveFabric(updateNocResponse.fabricIndex))
+        currentFabricIndexResponse = await tempDevCtrl.ReadAttribute(newNodeIdForUpdateNoc, [(Clusters.OperationalCredentials.Attributes.CurrentFabricIndex)])
+        updatedNOCFabricIndex = currentFabricIndexResponse[0][Clusters.OperationalCredentials][Clusters.OperationalCredentials.Attributes.CurrentFabricIndex]
+        removeFabricResponse = await tempDevCtrl.SendCommand(newNodeIdForUpdateNoc, 0, Clusters.OperationalCredentials.Commands.RemoveFabric(updatedNOCFabricIndex))
 
-        endOfTestFabricCount = await self._GetCommissonedFabricCount(nodeid)
-        if endOfTestFabricCount != startOfTestFabricCount:
+        if startOfTestFabricCount != await self._GetCommissonedFabricCount(nodeid):
             self.logger.error("Expected fabric count to be the same at the end of test as when it started")
             return False
 
@@ -590,8 +628,8 @@ class BaseTestHelper:
         await self.devCtrl.SendCommand(nodeid, 0, Clusters.AdministratorCommissioning.Commands.OpenBasicCommissioningWindow(180), timedRequestTimeoutMs=10000)
 
         self.logger.info("Creating 2nd Fabric Admin")
-        self.fabricAdmin2 = chip.FabricAdmin.FabricAdmin(
-            fabricId=2, fabricIndex=2)
+        self.fabricAdmin2 = chip.FabricAdmin.FabricAdmin(vendorId=0xFFF1,
+                                                         fabricId=2, adminIndex=2)
 
         self.logger.info("Creating Device Controller on 2nd Fabric")
         self.devCtrl2 = self.fabricAdmin2.NewController(
@@ -613,9 +651,10 @@ class BaseTestHelper:
 
         self.logger.info("Shutdown completed, starting new controllers...")
 
-        self.fabricAdmin = chip.FabricAdmin.FabricAdmin(
-            fabricId=1, fabricIndex=1)
-        fabricAdmin2 = chip.FabricAdmin.FabricAdmin(fabricId=2, fabricIndex=2)
+        self.fabricAdmin = chip.FabricAdmin.FabricAdmin(vendorId=0XFFF1,
+                                                        fabricId=1, adminIndex=1)
+        fabricAdmin2 = chip.FabricAdmin.FabricAdmin(vendorId=0xFFF1,
+                                                    fabricId=2, adminIndex=2)
 
         self.devCtrl = self.fabricAdmin.NewController(
             self.controllerNodeId, self.paaTrustStorePath)
@@ -812,6 +851,52 @@ class BaseTestHelper:
         if (expectedDataFabric1 != readListDataFabric1):
             raise AssertionError("Got back mismatched data")
 
+    async def TestResubscription(self, nodeid: int):
+        ''' This validates the re-subscription logic by triggering a liveness failure caused by the expiration
+            of the underlying CASE session and the resultant failure to receive reports from the server. This should
+            trigger CASE session establishment and subscription restablishment. Both the attempt and successful
+            restablishment of the subscription are validated.
+        '''
+        cv = asyncio.Condition()
+        resubAttempted = False
+        resubSucceeded = True
+
+        async def OnResubscriptionAttempted(transaction, errorEncountered: int, nextResubscribeIntervalMsec: int):
+            self.logger.info("Re-subscription Attempted")
+            nonlocal resubAttempted
+            resubAttempted = True
+
+        async def OnResubscriptionSucceeded(transaction):
+            self.logger.info("Re-subscription Succeeded")
+            nonlocal cv
+            async with cv:
+                cv.notify()
+
+        subscription = await self.devCtrl.ReadAttribute(nodeid, [(Clusters.Basic.Attributes.ClusterRevision)], reportInterval=(0, 5))
+
+        #
+        # Register async callbacks that will fire when a re-sub is attempted or succeeds.
+        #
+        subscription.SetResubscriptionAttemptedCallback(OnResubscriptionAttempted, True)
+        subscription.SetResubscriptionSucceededCallback(OnResubscriptionSucceeded, True)
+
+        #
+        # Over-ride the default liveness timeout (which is set quite high to accomodate for
+        # transport delays) to something very small. This ensures that our liveness timer will
+        # fire quickly and cause a re-subscription to occur naturally.
+        #
+        subscription.OverrideLivenessTimeoutMs(100)
+
+        async with cv:
+            if (not(resubAttempted) or not(resubSucceeded)):
+                res = await asyncio.wait_for(cv.wait(), 3)
+                if not res:
+                    self.logger.error("Timed out waiting for resubscription to succeed")
+                    return False
+
+        subscription.Shutdown()
+        return True
+
     def TestCloseSession(self, nodeid: int):
         self.logger.info(f"Closing sessions with device {nodeid}")
         try:
@@ -852,7 +937,7 @@ class BaseTestHelper:
         self.logger.info(
             f"Sending MoveToLevel command to device {nodeid} endpoint {endpoint}")
         try:
-            commonArgs = dict(transitionTime=0, optionMask=1, optionOverride=1)
+            commonArgs = dict(transitionTime=0, optionsMask=1, optionsOverride=1)
 
             # Move to 1
             self.devCtrl.ZCLSend("LevelControl", "MoveToLevel", nodeid,
@@ -1068,3 +1153,17 @@ class BaseTestHelper:
             self.logger.exception(f"Failed to finish API test: {ex}")
             return False
         return True
+
+    def TestFabricScopedCommandDuringPase(self, nodeid: int):
+        '''Validates that fabric-scoped commands fail during PASE with UNSUPPORTED_ACCESS
+
+        The nodeid is the PASE pseudo-node-ID used during PASE establishment
+        '''
+        status = None
+        try:
+            response = asyncio.run(self.devCtrl.SendCommand(
+                nodeid, 0, Clusters.OperationalCredentials.Commands.UpdateFabricLabel("roboto")))
+        except IM.InteractionModelError as ex:
+            status = ex.status
+
+        return status == IM.Status.UnsupportedAccess

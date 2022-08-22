@@ -111,9 +111,17 @@ void SessionManager::Shutdown()
         mFabricTable->RemoveFabricDelegate(this);
         mFabricTable = nullptr;
     }
+
+    // Ensure that we don't create new sessions as we iterate our session table.
+    mState = State::kNotReady;
+
+    mSecureSessions.ForEachSession([&](auto session) {
+        session->MarkForEviction();
+        return Loop::Continue;
+    });
+
     mMessageCounterManager = nullptr;
 
-    mState        = State::kNotReady;
     mSystemLayer  = nullptr;
     mTransportMgr = nullptr;
     mCB           = nullptr;
@@ -121,7 +129,7 @@ void SessionManager::Shutdown()
 
 /**
  * @brief Notification that a fabric was removed.
- *        This function doesn't call ExpireAllPairingsForFabric
+ *        This function doesn't call ExpireAllSessionsForFabric
  *        since the CASE session might still be open to send a response
  *        on the removed fabric.
  */
@@ -332,6 +340,60 @@ CHIP_ERROR SessionManager::SendPreparedMessage(const SessionHandle & sessionHand
     VerifyOrReturnError(!msgBuf.IsNull(), CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrReturnError(!msgBuf->HasChainedBuffer(), CHIP_ERROR_INVALID_MESSAGE_LENGTH);
 
+#if CHIP_SYSTEM_CONFIG_MULTICAST_HOMING
+    if (sessionHandle->GetSessionType() == Transport::Session::SessionType::kGroupOutgoing)
+    {
+        chip::Inet::InterfaceIterator interfaceIt;
+        chip::Inet::InterfaceId interfaceId = chip::Inet::InterfaceId::Null();
+        chip::Inet::IPAddress addr;
+        bool interfaceFound = false;
+
+        while (interfaceIt.Next())
+        {
+            char name[chip::Inet::InterfaceId::kMaxIfNameLength];
+            interfaceIt.GetInterfaceName(name, chip::Inet::InterfaceId::kMaxIfNameLength);
+            if (interfaceIt.SupportsMulticast() && interfaceIt.IsUp())
+            {
+                interfaceId = interfaceIt.GetInterfaceId();
+                if (CHIP_NO_ERROR == interfaceId.GetLinkLocalAddr(&addr))
+                {
+                    ChipLogDetail(Inet, "Interface %s has a link local address", name);
+
+                    interfaceFound             = true;
+                    PacketBufferHandle tempBuf = msgBuf.CloneData();
+                    VerifyOrReturnError(!tempBuf.IsNull(), CHIP_ERROR_INVALID_ARGUMENT);
+                    VerifyOrReturnError(!tempBuf->HasChainedBuffer(), CHIP_ERROR_INVALID_MESSAGE_LENGTH);
+
+                    destination = &(multicastAddress.SetInterface(interfaceId));
+                    if (mTransportMgr != nullptr)
+                    {
+                        CHIP_TRACE_PREPARED_MESSAGE_SENT(destination, &tempBuf);
+                        if (CHIP_NO_ERROR != mTransportMgr->SendMessage(*destination, std::move(tempBuf)))
+                        {
+                            ChipLogError(Inet, "Failed to send Multicast message on interface %s", name);
+                        }
+                        else
+                        {
+                            ChipLogDetail(Inet, "Successfully send Multicast message on interface %s", name);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!interfaceFound)
+        {
+            ChipLogError(Inet, "No valid Interface found.. Sending to the default one.. ");
+        }
+        else
+        {
+            // Always return No error, because we expect some interface to fails and others to always succeed (e.g. lo interface)
+            return CHIP_NO_ERROR;
+        }
+    }
+
+#endif // CHIP_SYSTEM_CONFIG_MULTICAST_HOMING
+
     if (mTransportMgr != nullptr)
     {
         CHIP_TRACE_PREPARED_MESSAGE_SENT(destination, &msgBuf);
@@ -342,32 +404,38 @@ CHIP_ERROR SessionManager::SendPreparedMessage(const SessionHandle & sessionHand
     return CHIP_ERROR_INCORRECT_STATE;
 }
 
-void SessionManager::ExpireAllPairings(const ScopedNodeId & node)
+void SessionManager::ExpireAllSessions(const ScopedNodeId & node)
 {
-    mSecureSessions.ForEachSession([&](auto session) {
-        if (session->GetPeer() == node)
-        {
-            session->MarkForEviction();
-        }
-        return Loop::Continue;
-    });
+    ChipLogDetail(Inet, "Expiring all sessions for node " ChipLogFormatScopedNodeId "!!", ChipLogValueScopedNodeId(node));
+
+    ForEachMatchingSession(node, [](auto * session) { session->MarkForEviction(); });
 }
 
-void SessionManager::ExpireAllPairingsForFabric(FabricIndex fabric)
+void SessionManager::ExpireAllSessionsForFabric(FabricIndex fabricIndex)
 {
-    ChipLogDetail(Inet, "Expiring all connections for fabric %d!!", fabric);
-    mSecureSessions.ForEachSession([&](auto session) {
-        if (session->GetFabricIndex() == fabric)
-        {
-            session->MarkForEviction();
-        }
-        return Loop::Continue;
-    });
+    ChipLogDetail(Inet, "Expiring all sessions for fabric 0x%x!!", static_cast<unsigned>(fabricIndex));
+
+    ForEachMatchingSession(fabricIndex, [](auto * session) { session->MarkForEviction(); });
 }
 
-void SessionManager::ExpireAllPASEPairings()
+CHIP_ERROR SessionManager::ExpireAllSessionsOnLogicalFabric(const ScopedNodeId & node)
 {
-    ChipLogDetail(Inet, "Expiring all PASE pairings");
+    ChipLogDetail(Inet, "Expiring all sessions to peer " ChipLogFormatScopedNodeId " that are on the same logical fabric!!",
+                  ChipLogValueScopedNodeId(node));
+
+    return ForEachMatchingSessionOnLogicalFabric(node, [](auto * session) { session->MarkForEviction(); });
+}
+
+CHIP_ERROR SessionManager::ExpireAllSessionsOnLogicalFabric(FabricIndex fabricIndex)
+{
+    ChipLogDetail(Inet, "Expiring all sessions on the same logical fabric as fabric 0x%x!!", static_cast<unsigned>(fabricIndex));
+
+    return ForEachMatchingSessionOnLogicalFabric(fabricIndex, [](auto * session) { session->MarkForEviction(); });
+}
+
+void SessionManager::ExpireAllPASESessions()
+{
+    ChipLogDetail(Inet, "Expiring all PASE sessions");
     mSecureSessions.ForEachSession([&](auto session) {
         if (session->GetSecureSessionType() == Transport::SecureSession::Type::kPASE)
         {
@@ -377,9 +445,35 @@ void SessionManager::ExpireAllPASEPairings()
     });
 }
 
+void SessionManager::MarkSessionsAsDefunct(const ScopedNodeId & node, const Optional<Transport::SecureSession::Type> & type)
+{
+    mSecureSessions.ForEachSession([&node, &type](auto session) {
+        if (session->IsActiveSession() && session->GetPeer() == node &&
+            (!type.HasValue() || type.Value() == session->GetSecureSessionType()))
+        {
+            session->MarkAsDefunct();
+        }
+        return Loop::Continue;
+    });
+}
+
+void SessionManager::UpdateAllSessionsPeerAddress(const ScopedNodeId & node, const Transport::PeerAddress & addr)
+{
+    mSecureSessions.ForEachSession([&node, &addr](auto session) {
+        // Arguably we should only be updating active and defunct sessions, but there is no harm
+        // in updating evicted sessions.
+        if (session->GetPeer() == node && Transport::SecureSession::Type::kCASE == session->GetSecureSessionType())
+        {
+            session->SetPeerAddress(addr);
+        }
+        return Loop::Continue;
+    });
+}
+
 Optional<SessionHandle> SessionManager::AllocateSession(SecureSession::Type secureSessionType,
                                                         const ScopedNodeId & sessionEvictionHint)
 {
+    VerifyOrReturnValue(mState == State::kInitialized, NullOptional);
     return mSecureSessions.CreateNewSecureSession(secureSessionType, sessionEvictionHint);
 }
 
@@ -430,7 +524,12 @@ void SessionManager::OnMessageReceived(const PeerAddress & peerAddress, System::
     CHIP_TRACE_PREPARED_MESSAGE_RECEIVED(&peerAddress, &msg);
     PacketHeader packetHeader;
 
-    ReturnOnFailure(packetHeader.DecodeAndConsume(msg));
+    CHIP_ERROR err = packetHeader.DecodeAndConsume(msg);
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogError(Inet, "Failed to decode packet header: %" CHIP_ERROR_FORMAT, err.Format());
+        return;
+    }
 
     if (packetHeader.IsEncrypted())
     {

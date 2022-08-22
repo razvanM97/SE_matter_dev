@@ -22,6 +22,7 @@ acdbc
 ACKed
 ACL
 ACLs
+actdiag
 AdapterAddress
 AdapterName
 adb
@@ -42,11 +43,16 @@ AdvSendAdvert
 AE
 aef
 AES
+AlarmCode
 algs
 alloc
 Ameba
 amebad
+AmebaD
 amebaiot
+AmebaZ
+amebaz2
+AmebaZ2
 announcementReason
 AnnounceOTAProvider
 AnnounceOtaProviderRequest
@@ -54,6 +60,7 @@ APIs
 apk
 AppConfig
 AppImpl
+AppleTV
 appliable
 ApplianceControl
 applianceeventsandalert
@@ -76,6 +83,9 @@ argc
 args
 argv
 armeabi
+armino
+Armino
+ARMINO
 ARMmbed
 armv
 ASAN
@@ -124,8 +134,10 @@ BDX
 BDXDownloader
 BeagleBone
 befc
+BEKEN
 betaprogram
 BinaryInputBasic
+Binfmt
 bitbake
 bld
 BLE
@@ -136,6 +148,7 @@ BLEManagerImpl
 BlePlatformDelegate
 Blinls
 bloaty
+blockdiag
 blocklist
 blockquote
 bluetoothd
@@ -148,7 +161,6 @@ bouffalolab
 BRD
 breakpoint
 bredr
-BridgedActions
 BridgedDeviceBasic
 bridgedLightEndpoint
 bringup
@@ -160,7 +172,9 @@ btmgmt
 BTN
 BTP
 btvirt
+BuildKit
 buildwithmatter
+buildX
 burndown
 ButtonIsr
 BytesMain
@@ -178,6 +192,7 @@ CatalogVendorId
 CBB
 cbd
 CBOR
+Ccache
 ccf
 CCMP
 CCS
@@ -221,6 +236,7 @@ ChlorineConcentrationMeasurement
 ChlorodibromomethaneConcentrationMeasurement
 ChloroformConcentrationMeasurement
 chmod
+chown
 chrpath
 CIPD
 CircleCI
@@ -278,8 +294,8 @@ connstring
 conntype
 const
 ContentApp
-ContentAppPlatform
 ContentApp's
+ContentAppPlatform
 ContentLaunch
 ContentLauncher
 continuousHinting
@@ -372,6 +388,7 @@ DeviceCommissioner
 DeviceCommon
 DeviceController
 DeviceId
+DeviceInstanceInfoProvider
 DeviceLayer
 DeviceNetworkProvisioningDelegate
 DeviceNetworkProvisioningDelegateImpl
@@ -419,6 +436,7 @@ Dockerfile
 Dockerfiles
 Don'ts
 DoorLock
+DoorState
 doru
 DOTBR
 DOVERLAY
@@ -485,6 +503,7 @@ EthyleneOxideConcentrationMeasurement
 EvalCode
 EvalCodeWithName
 EvalFrameDefault
+EVB
 evk
 exceptfds
 ExchangeContext
@@ -543,6 +562,7 @@ GDB
 gdbserver
 GeneralCommissioning
 GeneralDiagnostics
+generalised
 GenericConfigurationManagerImpl
 GenericConnectivityManagerImpl
 GenericImpl
@@ -601,6 +621,8 @@ HKDF
 HMAC
 hoc
 homebrew
+HomePod
+HomePods
 hostapd
 hostname
 href
@@ -614,6 +636,7 @@ IasWd
 iaszone
 ibb
 ICA
+iCloud
 ICMP
 IDF
 IDL
@@ -659,6 +682,7 @@ InvokeCommandRequests
 InvokeCommandResponse
 IoT
 ipaddr
+iPadOS
 ipadr
 ipp
 iptables
@@ -761,6 +785,7 @@ LTE
 LTS
 LwIP
 LwIP's
+LZMA
 macaddr
 machineType
 MacOS
@@ -852,6 +877,7 @@ multilib
 Multiprotocol
 multithreaded
 mutexes
+mv
 MX
 mydir
 MyPASSWORD
@@ -884,6 +910,7 @@ NodeId
 nongnu
 nordicsemi
 NotAvailable
+NotifyUpdateApplied
 notValue
 npm
 nRF
@@ -897,6 +924,7 @@ nullptr
 NUM
 NVM
 NVS
+nwdiag
 nwk
 NXP
 objcopy
@@ -944,6 +972,7 @@ OTARequestorDriver
 OTARequestorInterface
 OTARequestorSerialPort
 OTARequestorStorage
+otasoftwareupdateapp
 OtaSoftwareUpdateProvider
 otasoftwareupdaterequestor
 otatesting
@@ -1087,8 +1116,8 @@ REPL
 repo
 req
 Requestor
-RequestorCanConsent
 Requestor's
+RequestorCanConsent
 Requestors
 responder
 RestrictedEvent
@@ -1112,6 +1141,7 @@ rsn
 RSSI
 RST
 rsync
+rtd
 RTL
 rtld
 RTOS
@@ -1134,8 +1164,8 @@ SDB
 SDC
 SDHC
 SDK
-sdkconfig
 SDK's
+sdkconfig
 SDKs
 SDKTARGETSYSROOT
 sdl
@@ -1145,6 +1175,7 @@ semver
 SendButton
 SendNewInputEvent
 sendto
+seqdiag
 SERIALDEVICE
 SerialNumber
 ServiceId
@@ -1159,6 +1190,7 @@ SetRequestorInstance
 SetUpPINCode
 SetupQRCode
 sexualized
+sfv
 SHA
 ShadeConfiguration
 showDocumentation
@@ -1189,6 +1221,7 @@ SoftwareVersion
 softwareVersionStr
 SoftwareVersionString
 softwareVersionValid
+sphinxcontrib
 SPI
 spiflash
 spinel
@@ -1221,6 +1254,7 @@ submodules
 subprocess
 SubscribeResponse
 SubscriptionId
+substeps
 subtype
 sudo
 SulfateConcentrationMeasurement
@@ -1321,6 +1355,7 @@ ttymxc
 ttyUSB
 TurbidityConcentrationMeasurement
 TvCasting
+tvOS
 TXD
 txt
 uargument
@@ -1367,8 +1402,8 @@ util
 utils
 UUID
 ux
-VCP
 validator
+VCP
 Vectorcall
 VendorID
 VendorName
@@ -1392,6 +1427,7 @@ WaitNewInputEvent
 WakeOnLan
 WantedBy
 watchdogTimeout
+watchOS
 webpage
 wg
 wget
@@ -1445,6 +1481,7 @@ xFFFF
 xfffff
 xFFFFFFEFFFFFFFFF
 xtensa
+xvzf
 xwayland
 xyz
 xz
@@ -1465,6 +1502,7 @@ zclsubscribe
 zclwrite
 ZephyrConfig
 zephyrproject
+zhengyaohan
 Zigbee
 zigbeealliance
 zigbeethread

@@ -15,78 +15,37 @@
 
 name: 3.4.4. [TC-SC-4.4] Operational Discovery - Controller [DUT - Controller]
 
+PICS:
+    - PICS_MCORE_ROLE_CONTROLLER
+
 config:
     nodeId: 0x12344321
     cluster: "Basic"
     endpoint: 0
 
 tests:
-    - label: "TH is instructed to start advertising a service using DNS-SD"
+    - label: "TH starts commissioning process with DUT"
       verification: |
-
+          verification step to be updated.
       disabled: true
 
-    - label: "Scan for DNS-SD advertising"
+    - label: "DUT reads nodelabel attribute from TH"
+      PICS: BINFO.C.A0005
       verification: |
-          ubuntu@ubuntu:~$ avahi-browse _matter._tcp -r
-
-          + veth721e1d9 IPv6 433B62F8F07F4327-0000000000000001             _matter._tcp         local
-          +   eth0 IPv6 433B62F8F07F4327-0000000000000001             _matter._tcp         local
-          = veth721e1d9 IPv6 433B62F8F07F4327-0000000000000001             _matter._tcp         local
-             hostname = [E45F0149AE290000.local]
-             address = [fe80::28e0:95ff:fed9:3085]
-             port = [5540]
-             txt = ["T=1" "SAI=300" "SII=5000"]
-          =   eth0 IPv6 433B62F8F07F4327-0000000000000001             _matter._tcp         local
-             hostname = [E45F0149AE290000.local]
-             address = [fe80::e65f:1ff:fe49:ae29]
-             port = [5540]
-             txt = ["T=1" "SAI=300" "SII=5000"]
+          verification step to be updated.
       disabled: true
 
-    - label: "DUT is instructed to advertise its service"
+    - label: "Change the IP address of TH by any means within the same network"
       verification: |
-
+          1. Take two routers connected to the same ISP as input.
+          2. Execute step 1 to step 5 using Router1 Configuration.
+          3. Once step 1 to step 5 are executed in Router1 switch TH and DUT to Router2.
+          4. Execute step 1 to step 5 using Router2 Configuration.
+          5. Check the IP so that the Routers(Router1 and Router2) will have different IPs to Raspi.
       disabled: true
 
-    - label: "Scan for DNS-SD advertising"
+    - label: "DUT reads nodelabel attribute from TH"
+      PICS: BINFO.C.A0005
       verification: |
-          avahi-browse _matter._tcp -r
-          + veth721e1d9 IPv6 433B62F8F07F4327-0000000000000001             _matter._tcp         local
-          +   eth0 IPv6 433B62F8F07F4327-0000000000000001             _matter._tcp         local
-          = veth721e1d9 IPv6 433B62F8F07F4327-0000000000000001             _matter._tcp         local
-             hostname = [E45F0149AE290000.local]
-             address = [fe80::28e0:95ff:fed9:3085]
-             port = [5540]
-             txt = ["T=1" "SAI=300" "SII=5000"]
-          =   eth0 IPv6 433B62F8F07F4327-0000000000000001             _matter._tcp         local
-             hostname = [E45F0149AE290000.local]
-             address = [fe80::e65f:1ff:fe49:ae29]
-             port = [5540]
-             txt = ["T=1" "SAI=300" "SII=5000"]
-      disabled: true
-
-    - label: "DUT is instructed to query the TH for its services"
-      verification: |
-
-      disabled: true
-
-    - label: "Change its IP address by any means"
-      verification: |
-          change the IP address
-          1.we have to take two routers
-          2.execute the above steps using the 1st router
-          3.switch the connection to 2nd router and execute the below steps and check the ipaddress of the routers.
-      disabled: true
-
-    - label: "DUT is instructed to query the TH for its services"
-      verification: |
-          ubuntu@ubuntu:~$ avahi-browse _matter._tcp -r
-
-          + veth721e1d9 IPv6 433B62F8F07F4327-0000000000000001             _matter._tcp         local
-          = veth721e1d9 IPv6 433B62F8F07F4327-0000000000000001             _matter._tcp         local
-             hostname = [E45F0149AE290000.local]
-             address = [fe80::28e0:95ff:fed9:3085]
-             port = [5540]
-             txt = ["T=1" "SAI=300" "SII=5000"]
+          verification step to be updated.
       disabled: true

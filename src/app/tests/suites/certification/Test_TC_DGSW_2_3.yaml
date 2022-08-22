@@ -14,6 +14,10 @@
 
 name: 43.2.3. [TC-DGSW-2.3] Command received functionality with server as DUT
 
+PICS:
+    - DGSW.S.C
+    - DGSW.S
+
 config:
     nodeId: 0x12344321
     cluster: "Software Diagnostics"
@@ -30,7 +34,7 @@ tests:
 
     - label: "Sends ResetWatermarks to DUT"
       command: "ResetWatermarks"
-      PICS: DGSW.S.C00
+      PICS: DGSW.S.C00.Rsp
 
     - label: "Reads a list of ThreadMetrics struct attribute from DUT."
       command: "readAttribute"
@@ -44,16 +48,16 @@ tests:
     - label: "Reads CurrentHeapUsed attribute value from DUT"
       command: "readAttribute"
       attribute: "CurrentHeapUsed"
-      PICS: DGSW.S.A0003
+      PICS: DGSW.S.A0002
       response:
           constraints:
-              type: uint64
+              type: int64u
 
     #issue #830
     - label: "Reads CurrentHeapHighWaterMark attribute value from DUT"
       command: "readAttribute"
       attribute: "CurrentHeapHighWatermark"
-      PICS: DGSW.S.A0004
+      PICS: DGSW.S.A0003
       response:
           constraints:
-              type: uint64
+              type: int64u

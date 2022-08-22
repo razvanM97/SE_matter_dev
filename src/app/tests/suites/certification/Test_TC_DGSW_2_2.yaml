@@ -15,12 +15,24 @@
 
 name: 43.2.2. [TC-DGSW-2.2] Event functionality with server as DUT
 
+PICS:
+    - DGSW.S.E
+    - DGSW.S
+
 config:
     nodeId: 0x12344321
     cluster: "Software Diagnostics"
     endpoint: 0
 
 tests:
+    - label: "Wait for the commissioned device to be retrieved"
+      cluster: "DelayCommands"
+      command: "WaitForCommissionee"
+      arguments:
+          values:
+              - name: "nodeId"
+                value: nodeId
+
     - label:
           "Reads a list of SoftwareFault struct from DUT and data type in each
           field of the struct must match the value listed in spec"
@@ -43,7 +55,7 @@ tests:
           [1649682271.390714][9722:9727] CHIP:EM: Sending Standalone Ack for MessageCounter:4574884 on exchange 14495i
       cluster: "LogCommands"
       command: "UserPrompt"
-      PICS: PICS_USER_PROMPT
+      PICS: PICS_USER_PROMPT && DGSW.S.E00
       arguments:
           values:
               - name: "message"

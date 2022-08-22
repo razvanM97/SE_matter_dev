@@ -78,7 +78,8 @@
 	platforms = qpg
 [submodule "third_party/openthread/ot-efr32"]
 	path = third_party/openthread/ot-efr32
-	url = https://github.com/openthread/ot-efr32.git
+	url = https://github.com/SiliconLabs/ot-efr32.git
+	branch  = matter_sve
 	platforms = efr32
 [submodule "third_party/openthread/ot-ifx"]
 	path = third_party/openthread/ot-ifx
@@ -225,7 +226,7 @@
 	platforms = p6
 [submodule "third_party/telink_sdk/repo"]
 	path = third_party/telink_sdk/repo
-	url = https://github.com/rikorsev/telink_b91_ble_sdk
+	url = https://github.com/telink-semi/telink_b91_ble_single_connection_sdk_matter
 	platforms = telink
 [submodule "ti_simplelink_sdk"]
 	path = third_party/ti_simplelink_sdk/repo_cc13xx_cc26xx
@@ -269,3 +270,6 @@
 [submodule "editline"]
 	path = third_party/editline/repo
 	url = https://github.com/troglobit/editline.git
+[submodule "third_party/boringssl/repo/src"]
+	path = third_party/boringssl/repo/src
+	url = https://github.com/google/boringssl.git

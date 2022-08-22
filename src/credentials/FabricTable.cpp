@@ -28,9 +28,6 @@
 #include <lib/support/DefaultStorageKeyAllocator.h>
 #include <lib/support/SafeInt.h>
 #include <lib/support/ScopedBuffer.h>
-#if CHIP_CRYPTO_HSM
-#include <crypto/hsm/CHIPCryptoPALHsm.h>
-#endif
 
 namespace chip {
 using namespace Credentials;
@@ -85,7 +82,7 @@ CHIP_ERROR FabricInfo::Init(const FabricInfo::InitParams & initParams)
     mFabricIndex        = initParams.fabricIndex;
     mCompressedFabricId = initParams.compressedFabricId;
     mRootPublicKey      = initParams.rootPublicKey;
-    mVendorId           = initParams.vendorId;
+    mVendorId           = static_cast<VendorId>(initParams.vendorId);
 
     // Deal with externally injected keys
     if (initParams.operationalKeypair != nullptr)
@@ -226,8 +223,18 @@ CHIP_ERROR FabricTable::DeleteMetadataFromStorage(FabricIndex fabricIndex)
 
     if (deleteErr != CHIP_NO_ERROR)
     {
-        ChipLogError(FabricProvisioning, "Error deleting part of fabric %d: %" CHIP_ERROR_FORMAT, fabricIndex, deleteErr.Format());
+        if (deleteErr == CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND)
+        {
+            ChipLogError(FabricProvisioning, "Warning: metadata not found during delete of fabric 0x%x",
+                         static_cast<unsigned>(fabricIndex));
+        }
+        else
+        {
+            ChipLogError(FabricProvisioning, "Error deleting metadata for fabric fabric 0x%x: %" CHIP_ERROR_FORMAT,
+                         static_cast<unsigned>(fabricIndex), deleteErr.Format());
+        }
     }
+
     return deleteErr;
 }
 
@@ -247,11 +254,7 @@ CHIP_ERROR FabricInfo::SetOperationalKeypair(const P256Keypair * keyPair)
 
     if (mOperationalKey == nullptr)
     {
-#ifdef ENABLE_HSM_CASE_OPS_KEY
-        mOperationalKey = chip::Platform::New<P256KeypairHSM>();
-#else
         mOperationalKey = chip::Platform::New<P256Keypair>();
-#endif
     }
     VerifyOrReturnError(mOperationalKey != nullptr, CHIP_ERROR_NO_MEMORY);
     return mOperationalKey->Deserialize(serialized);
@@ -436,13 +439,25 @@ CHIP_ERROR FabricTable::VerifyCredentials(const ByteSpan & noc, const ByteSpan &
 
 const FabricInfo * FabricTable::FindFabric(const Crypto::P256PublicKey & rootPubKey, FabricId fabricId) const
 {
+    return FindFabricCommon(rootPubKey, fabricId);
+}
+
+const FabricInfo * FabricTable::FindIdentity(const Crypto::P256PublicKey & rootPubKey, FabricId fabricId, NodeId nodeId) const
+{
+    return FindFabricCommon(rootPubKey, fabricId, nodeId);
+}
+
+const FabricInfo * FabricTable::FindFabricCommon(const Crypto::P256PublicKey & rootPubKey, FabricId fabricId, NodeId nodeId) const
+{
     P256PublicKey candidatePubKey;
 
     // Try to match pending fabric first if available
     if (HasPendingFabricUpdate())
     {
         bool pubKeyAvailable = (mPendingFabric.FetchRootPubkey(candidatePubKey) == CHIP_NO_ERROR);
-        if (pubKeyAvailable && rootPubKey.Matches(candidatePubKey) && fabricId == mPendingFabric.GetFabricId())
+        auto matchingNodeId  = (nodeId == kUndefinedNodeId) ? mPendingFabric.GetNodeId() : nodeId;
+        if (pubKeyAvailable && rootPubKey.Matches(candidatePubKey) && fabricId == mPendingFabric.GetFabricId() &&
+            matchingNodeId == mPendingFabric.GetNodeId())
         {
             return &mPendingFabric;
         }
@@ -450,6 +465,8 @@ const FabricInfo * FabricTable::FindFabric(const Crypto::P256PublicKey & rootPub
 
     for (auto & fabric : mStates)
     {
+        auto matchingNodeId = (nodeId == kUndefinedNodeId) ? fabric.GetNodeId() : nodeId;
+
         if (!fabric.IsInitialized())
         {
             continue;
@@ -458,7 +475,7 @@ const FabricInfo * FabricTable::FindFabric(const Crypto::P256PublicKey & rootPub
         {
             continue;
         }
-        if (rootPubKey.Matches(candidatePubKey) && fabricId == fabric.GetFabricId())
+        if (rootPubKey.Matches(candidatePubKey) && fabricId == fabric.GetFabricId() && matchingNodeId == fabric.GetNodeId())
         {
             return &fabric;
         }
@@ -542,6 +559,24 @@ CHIP_ERROR FabricTable::FetchRootCert(FabricIndex fabricIndex, MutableByteSpan &
 {
     VerifyOrReturnError(mOpCertStore != nullptr, CHIP_ERROR_INCORRECT_STATE);
     return mOpCertStore->GetCertificate(fabricIndex, CertChainElement::kRcac, outCert);
+}
+
+CHIP_ERROR FabricTable::FetchPendingNonFabricAssociatedRootCert(MutableByteSpan & outCert) const
+{
+    VerifyOrReturnError(mOpCertStore != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    if (!mStateFlags.Has(StateFlags::kIsTrustedRootPending))
+    {
+        return CHIP_ERROR_NOT_FOUND;
+    }
+
+    if (mStateFlags.Has(StateFlags::kIsAddPending))
+    {
+        // The root certificate is already associated with a pending fabric, so
+        // does not exist for purposes of this API.
+        return CHIP_ERROR_NOT_FOUND;
+    }
+
+    return FetchRootCert(mFabricIndexWithPendingState, outCert);
 }
 
 CHIP_ERROR FabricTable::FetchICACert(FabricIndex fabricIndex, MutableByteSpan & outCert) const
@@ -636,7 +671,8 @@ CHIP_ERROR FabricTable::LoadFromStorage(FabricInfo * fabric, FabricIndex newFabr
                     "Fabric index 0x%x was retrieved from storage. Compressed FabricId 0x" ChipLogFormatX64
                     ", FabricId 0x" ChipLogFormatX64 ", NodeId 0x" ChipLogFormatX64 ", VendorId 0x%04X",
                     static_cast<unsigned>(fabric->GetFabricIndex()), ChipLogValueX64(fabric->GetCompressedFabricId()),
-                    ChipLogValueX64(fabric->GetFabricId()), ChipLogValueX64(fabric->GetNodeId()), fabric->GetVendorId());
+                    ChipLogValueX64(fabric->GetFabricId()), ChipLogValueX64(fabric->GetNodeId()),
+                    to_underlying(fabric->GetVendorId()));
 
     return CHIP_NO_ERROR;
 }
@@ -760,7 +796,7 @@ FabricTable::AddOrUpdateInner(FabricIndex fabricIndex, bool isAddition, Crypto::
 
         VerifyOrReturnError(fabricEntry != nullptr, CHIP_ERROR_NO_MEMORY);
 
-        newFabricInfo.vendorId    = vendorId;
+        newFabricInfo.vendorId    = static_cast<VendorId>(vendorId);
         newFabricInfo.fabricIndex = fabricIndex;
     }
     else
@@ -878,6 +914,18 @@ CHIP_ERROR FabricTable::Delete(FabricIndex fabricIndex)
 {
     VerifyOrReturnError(mStorage != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrReturnError(IsValidFabricIndex(fabricIndex), CHIP_ERROR_INVALID_ARGUMENT);
+
+    {
+        FabricTable::Delegate * delegate = mDelegateListRoot;
+        while (delegate)
+        {
+            // It is possible that delegate will remove itself from the list in FabricWillBeRemoved,
+            // so we grab the next delegate in the list now.
+            FabricTable::Delegate * nextDelegate = delegate->next;
+            delegate->FabricWillBeRemoved(*this, fabricIndex);
+            delegate = nextDelegate;
+        }
+    }
 
     FabricInfo * fabricInfo = GetMutableFabricByIndex(fabricIndex);
     if (fabricInfo == &mPendingFabric)
@@ -1695,6 +1743,7 @@ CHIP_ERROR FabricTable::UpdatePendingFabricCommon(FabricIndex fabricIndex, const
 
     // Check for an existing fabric matching RCAC and FabricID. We must find a correct
     // existing fabric that chains to same root. We assume the stored root is correct.
+    if (!mStateFlags.Has(StateFlags::kAreCollidingFabricsIgnored))
     {
         FabricIndex collidingFabricIndex = kUndefinedFabricIndex;
         ReturnErrorOnFailure(FindExistingFabricByNocChaining(fabricIndex, noc, collidingFabricIndex));
@@ -1733,6 +1782,7 @@ CHIP_ERROR FabricTable::CommitPendingFabricData()
     bool isAdding                = mStateFlags.Has(StateFlags::kIsAddPending);
     bool isUpdating              = mStateFlags.Has(StateFlags::kIsUpdatePending);
     bool hasPending              = mStateFlags.Has(StateFlags::kIsPendingFabricDataPresent);
+    bool onlyHaveNewTrustedRoot  = hasPending && haveNewTrustedRoot && !(isAdding || isUpdating);
     bool hasInvalidInternalState = hasPending && (!IsValidFabricIndex(mFabricIndexWithPendingState) || !(isAdding || isUpdating));
 
     FabricIndex fabricIndexBeingCommitted = mFabricIndexWithPendingState;
@@ -1783,20 +1833,20 @@ CHIP_ERROR FabricTable::CommitPendingFabricData()
 
     // If there was nothing pending, we are either in a completely OK state, or weird internally inconsistent
     // state. In either case, let's clear all pending state anyway, in case it was partially stale!
-    if (!hasPending || hasInvalidInternalState)
+    if (!hasPending || onlyHaveNewTrustedRoot || hasInvalidInternalState)
     {
         CHIP_ERROR err = CHIP_NO_ERROR;
-        if (hasInvalidInternalState)
-        {
-            ChipLogError(FabricProvisioning, "Failed to commit: internally inconsistent state!");
-            err = CHIP_ERROR_INTERNAL;
-        }
-        else if (haveNewTrustedRoot)
+
+        if (onlyHaveNewTrustedRoot)
         {
             ChipLogError(FabricProvisioning,
                          "Failed to commit: tried to commit with only a new trusted root cert. No data committed.");
-            hasInvalidInternalState = true;
-            err                     = CHIP_ERROR_INCORRECT_STATE;
+            err = CHIP_ERROR_INCORRECT_STATE;
+        }
+        else if (hasInvalidInternalState)
+        {
+            ChipLogError(FabricProvisioning, "Failed to commit: internally inconsistent state!");
+            err = CHIP_ERROR_INTERNAL;
         }
         else
         {
@@ -2005,13 +2055,13 @@ void FabricTable::RevertPendingOpCertsExceptRoot()
 CHIP_ERROR FabricTable::SetFabricLabel(FabricIndex fabricIndex, const CharSpan & fabricLabel)
 {
     VerifyOrReturnError(mStorage != nullptr, CHIP_ERROR_INCORRECT_STATE);
-    VerifyOrReturnError(IsValidFabricIndex(fabricIndex), CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrReturnError(IsValidFabricIndex(fabricIndex), CHIP_ERROR_INVALID_FABRIC_INDEX);
 
     ReturnErrorCodeIf(fabricLabel.size() > kFabricLabelMaxLengthInBytes, CHIP_ERROR_INVALID_ARGUMENT);
 
     FabricInfo * fabricInfo  = GetMutableFabricByIndex(fabricIndex);
     bool fabricIsInitialized = (fabricInfo != nullptr) && fabricInfo->IsInitialized();
-    VerifyOrReturnError(fabricIsInitialized, CHIP_ERROR_INCORRECT_STATE);
+    VerifyOrReturnError(fabricIsInitialized, CHIP_ERROR_INVALID_FABRIC_INDEX);
 
     // Update fabric table current in-memory entry, whether pending or not
     ReturnErrorOnFailure(fabricInfo->SetFabricLabel(fabricLabel));
@@ -2022,6 +2072,15 @@ CHIP_ERROR FabricTable::SetFabricLabel(FabricIndex fabricIndex, const CharSpan &
         ReturnErrorOnFailure(StoreFabricMetadata(fabricInfo));
     }
 
+    return CHIP_NO_ERROR;
+}
+
+CHIP_ERROR FabricTable::GetFabricLabel(FabricIndex fabricIndex, CharSpan & outFabricLabel)
+{
+    const FabricInfo * fabricInfo = FindFabricWithIndex(fabricIndex);
+    VerifyOrReturnError(fabricInfo != nullptr, CHIP_ERROR_INVALID_FABRIC_INDEX);
+
+    outFabricLabel = fabricInfo->GetFabricLabel();
     return CHIP_NO_ERROR;
 }
 

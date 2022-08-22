@@ -1147,7 +1147,7 @@ bool Cmd_GenCD(int argc, char * argv[])
         std::unique_ptr<EVP_PKEY, void (*)(EVP_PKEY *)> key(EVP_PKEY_new(), &EVP_PKEY_free);
 
         VerifyOrReturnError(ReadCert(gCertFileName, cert.get()), false);
-        VerifyOrReturnError(ReadKey(gKeyFileName, key.get()), false);
+        VerifyOrReturnError(ReadKey(gKeyFileName, key), false);
 
         // Extract the subject key id from the X509 certificate.
         ByteSpan signerKeyId;
@@ -1188,17 +1188,9 @@ bool Cmd_GenCD(int argc, char * argv[])
         }
 
         // Write to file.
-        {
-            FILE * file = nullptr;
-
-            VerifyOrReturnError(OpenFile(gSignedCDFileName, file, true), false);
-
-            if (fwrite(signedMessage.data(), 1, signedMessage.size(), file) != signedMessage.size())
-            {
-                fprintf(stderr, "Unable to write to %s: %s\n", gSignedCDFileName, strerror(ferror(file) ? errno : ENOSPC));
-                return false;
-            }
-        }
+        VerifyOrReturnError(WriteDataIntoFile(gSignedCDFileName, signedMessage.data(), static_cast<uint32_t>(signedMessage.size()),
+                                              kDataFormat_Raw),
+                            false);
     }
     return true;
 }

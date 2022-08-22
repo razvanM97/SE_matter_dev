@@ -17,11 +17,19 @@
 
 #include "OTAImageProcessorImpl.h"
 
+#include "Reboot.h"
+
 #include <app/clusters/ota-requestor/OTADownloader.h>
 #include <app/clusters/ota-requestor/OTARequestorInterface.h>
 #include <lib/support/CodeUtils.h>
 #include <platform/CHIPDeviceLayer.h>
 #include <system/SystemError.h>
+
+#if CONFIG_CHIP_CERTIFICATION_DECLARATION_STORAGE
+#include <credentials/CertificationDeclaration.h>
+#include <platform/Zephyr/ZephyrConfig.h>
+#include <settings/settings.h>
+#endif
 
 #include <dfu/dfu_multi_image.h>
 #include <dfu/dfu_target.h>
@@ -29,7 +37,14 @@
 #include <dfu/mcuboot.h>
 #include <logging/log.h>
 #include <pm/device.h>
-#include <sys/reboot.h>
+
+#if CONFIG_CHIP_CERTIFICATION_DECLARATION_STORAGE
+// Cd globals are needed to be accessed from dfu image writer lambdas
+namespace {
+uint8_t sCdBuf[chip::Credentials::kMaxCMSSignedCDMessage] = { 0 };
+size_t sCdSavedBytes                                      = 0;
+} // namespace
+#endif
 
 namespace chip {
 namespace DeviceLayer {
@@ -60,6 +75,22 @@ CHIP_ERROR OTAImageProcessorImpl::PrepareDownloadImpl()
 
         ReturnErrorOnFailure(System::MapErrorZephyr(dfu_multi_image_register_writer(&writer)));
     };
+
+#if CONFIG_CHIP_CERTIFICATION_DECLARATION_STORAGE
+    dfu_image_writer cdWriter;
+    cdWriter.image_id = CONFIG_CHIP_CERTIFiCATION_DECLARATION_OTA_IMAGE_ID;
+    cdWriter.open     = [](int id, size_t size) { return size <= sizeof(sCdBuf) ? 0 : -EFBIG; };
+    cdWriter.write    = [](const uint8_t * chunk, size_t chunk_size) {
+        memcpy(&sCdBuf[sCdSavedBytes], chunk, chunk_size);
+        sCdSavedBytes += chunk_size;
+        return 0;
+    };
+    cdWriter.close = [](bool success) {
+        return settings_save_one(Internal::ZephyrConfig::kConfigKey_CertificationDeclaration, sCdBuf, sCdSavedBytes);
+    };
+
+    ReturnErrorOnFailure(System::MapErrorZephyr(dfu_multi_image_register_writer(&cdWriter)));
+#endif
 
     return CHIP_NO_ERROR;
 }
@@ -93,7 +124,7 @@ CHIP_ERROR OTAImageProcessorImpl::Apply()
             [](System::Layer *, void * /* context */) {
                 PlatformMgr().HandleServerShuttingDown();
                 k_msleep(CHIP_DEVICE_CONFIG_SERVER_SHUTDOWN_ACTIONS_SLEEP_MS);
-                sys_reboot(SYS_REBOOT_WARM);
+                Reboot(SoftwareRebootReason::kSoftwareUpdate);
             },
             nullptr /* context */);
     }

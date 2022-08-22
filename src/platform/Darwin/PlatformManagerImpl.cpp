@@ -24,6 +24,11 @@
 
 #include <platform/internal/CHIPDeviceLayerInternal.h>
 
+#if !CHIP_DISABLE_PLATFORM_KVS
+#include <platform/Darwin/DeviceInstanceInfoProviderImpl.h>
+#include <platform/DeviceInstanceInfoProvider.h>
+#endif
+
 #include <platform/Darwin/DiagnosticDataProviderImpl.h>
 #include <platform/PlatformManager.h>
 
@@ -46,22 +51,24 @@ CHIP_ERROR PlatformManagerImpl::_InitChipStack()
     err = Internal::PosixConfig::Init();
     SuccessOrExit(err);
 #endif // CHIP_DISABLE_PLATFORM_KVS
-    SetConfigurationMgr(&ConfigurationManagerImpl::GetDefaultInstance());
-    SetDiagnosticDataProvider(&DiagnosticDataProviderImpl::GetDefaultInstance());
 
     mRunLoopSem = dispatch_semaphore_create(0);
 
     // Ensure there is a dispatch queue available
-    GetWorkQueue();
+    static_cast<System::LayerSocketsLoop &>(DeviceLayer::SystemLayer()).SetDispatchQueue(GetWorkQueue());
 
     // Call _InitChipStack() on the generic implementation base class
     // to finish the initialization process.
     err = Internal::GenericPlatformManagerImpl<PlatformManagerImpl>::_InitChipStack();
     SuccessOrExit(err);
 
-    mStartTime = System::SystemClock().GetMonotonicTimestamp();
+#if !CHIP_DISABLE_PLATFORM_KVS
+    // Now set up our device instance info provider.  We couldn't do that
+    // earlier, because the generic implementation sets a generic one.
+    SetDeviceInstanceInfoProvider(&DeviceInstanceInfoProviderMgrImpl());
+#endif // CHIP_DISABLE_PLATFORM_KVS
 
-    static_cast<System::LayerSocketsLoop &>(DeviceLayer::SystemLayer()).SetDispatchQueue(GetWorkQueue());
+    mStartTime = System::SystemClock().GetMonotonicTimestamp();
 
 exit:
     return err;

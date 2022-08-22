@@ -1,1 +1,1 @@
-0.5.84 Version bump reason: two more Yocto SDKs are to be integrated into the imx docker image
+0.5.93 Version bump reason: [ESP32] Update ESP-IDF to release v4.4.2

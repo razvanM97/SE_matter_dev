@@ -50,7 +50,7 @@
 
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x08006000, LENGTH = 0x178000
+  FLASH (rx) : ORIGIN = 0x08006000, LENGTH = 0x17A000
   RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 0x40000
 }
 
@@ -232,6 +232,7 @@ SECTIONS
   linker_nvm_begin = linker_nvm_end - SIZEOF(.nvm);
   linker_nvm_size = SIZEOF(.nvm);
   __nvm3Base = linker_nvm_begin;
+  __attestation_credentials_base = linker_nvm_end;
 
   /* Check if data + heap + stack exceeds RAM limit */
   /*ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")*/

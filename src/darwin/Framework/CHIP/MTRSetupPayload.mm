@@ -27,18 +27,23 @@
     chip::SetupPayload _chipSetupPayload;
 }
 
-- (MTRRendezvousInformationFlags)convertRendezvousFlags:(chip::RendezvousInformationFlags)value
+- (NSNumber *)convertRendezvousFlags:(const chip::Optional<chip::RendezvousInformationFlags> &)value
 {
-    if (value.Has(chip::RendezvousInformationFlag::kBLE)) {
-        return MTRRendezvousInformationBLE;
+    if (!value.HasValue()) {
+        return nil;
     }
-    if (value.Has(chip::RendezvousInformationFlag::kSoftAP)) {
-        return MTRRendezvousInformationSoftAP;
+
+    NSUInteger flags = MTRDiscoveryCapabilitiesNone;
+    if (value.Value().Has(chip::RendezvousInformationFlag::kBLE)) {
+        flags |= MTRDiscoveryCapabilitiesBLE;
     }
-    if (value.Has(chip::RendezvousInformationFlag::kOnNetwork)) {
-        return MTRRendezvousInformationOnNetwork;
+    if (value.Value().Has(chip::RendezvousInformationFlag::kSoftAP)) {
+        flags |= MTRDiscoveryCapabilitiesSoftAP;
     }
-    return MTRRendezvousInformationNone;
+    if (value.Value().Has(chip::RendezvousInformationFlag::kOnNetwork)) {
+        flags |= MTRDiscoveryCapabilitiesOnNetwork;
+    }
+    return [NSNumber numberWithUnsignedLong:flags];
 }
 
 - (MTRCommissioningFlow)convertCommissioningFlow:(chip::CommissioningFlow)value
@@ -64,7 +69,12 @@
         _productID = [NSNumber numberWithUnsignedShort:setupPayload.productID];
         _commissioningFlow = [self convertCommissioningFlow:setupPayload.commissioningFlow];
         _rendezvousInformation = [self convertRendezvousFlags:setupPayload.rendezvousInformation];
-        _discriminator = [NSNumber numberWithUnsignedShort:setupPayload.discriminator];
+        _hasShortDiscriminator = setupPayload.discriminator.IsShortDiscriminator();
+        if (_hasShortDiscriminator) {
+            _discriminator = [NSNumber numberWithUnsignedShort:setupPayload.discriminator.GetShortValue()];
+        } else {
+            _discriminator = [NSNumber numberWithUnsignedShort:setupPayload.discriminator.GetLongValue()];
+        }
         _setUpPINCode = [NSNumber numberWithUnsignedInt:setupPayload.setUpPINCode];
 
         [self getSerialNumber:setupPayload];
@@ -108,6 +118,25 @@
     return allOptionalData;
 }
 
++ (NSUInteger)generateRandomPIN
+{
+    do {
+        // Make sure the thing we generate is in the right range.
+        uint32_t setupPIN = arc4random_uniform(chip::kSetupPINCodeMaximumValue) + 1;
+        if (chip::SetupPayload::IsValidSetupPIN(setupPIN)) {
+            return setupPIN;
+        }
+
+        // We got pretty unlikely with our random number generation.  Just try
+        // again.  The chance that this loop does not terminate in a reasonable
+        // amount of time is astronomically low, assuming arc4random_uniform is not
+        // broken.
+    } while (1);
+
+    // Not reached.
+    return chip::kSetupPINCodeUndefinedValue;
+}
+
 #pragma mark - NSSecureCoding
 
 static NSString * const MTRSetupPayloadCodingKeyVersion = @"MTRSP.ck.version";
@@ -115,6 +144,7 @@ static NSString * const MTRSetupPayloadCodingKeyVendorID = @"MTRSP.ck.vendorID";
 static NSString * const MTRSetupPayloadCodingKeyProductID = @"MTRSP.ck.productID";
 static NSString * const MTRSetupPayloadCodingKeyCommissioningFlow = @"MTRSP.ck.commissioningFlow";
 static NSString * const MTRSetupPayloadCodingKeyRendezvousFlags = @"MTRSP.ck.rendezvousFlags";
+static NSString * const MTRSetupPayloadCodingKeyHasShortDiscriminator = @"MTRSP.ck.hasShortDiscriminator";
 static NSString * const MTRSetupPayloadCodingKeyDiscriminator = @"MTRSP.ck.discriminator";
 static NSString * const MTRSetupPayloadCodingKeySetupPINCode = @"MTRSP.ck.setupPINCode";
 static NSString * const MTRSetupPayloadCodingKeySerialNumber = @"MTRSP.ck.serialNumber";
@@ -129,8 +159,11 @@ static NSString * const MTRSetupPayloadCodingKeySerialNumber = @"MTRSP.ck.serial
     [coder encodeObject:self.version forKey:MTRSetupPayloadCodingKeyVersion];
     [coder encodeObject:self.vendorID forKey:MTRSetupPayloadCodingKeyVendorID];
     [coder encodeObject:self.productID forKey:MTRSetupPayloadCodingKeyProductID];
-    [coder encodeInteger:self.commissioningFlow forKey:MTRSetupPayloadCodingKeyCommissioningFlow];
-    [coder encodeInteger:self.rendezvousInformation forKey:MTRSetupPayloadCodingKeyRendezvousFlags];
+    // Casts are safe because commissioning flow and hasShortDiscriminator
+    // values are both pretty small and non-negative.
+    [coder encodeInteger:static_cast<NSInteger>(self.commissioningFlow) forKey:MTRSetupPayloadCodingKeyCommissioningFlow];
+    [coder encodeObject:self.rendezvousInformation forKey:MTRSetupPayloadCodingKeyRendezvousFlags];
+    [coder encodeInteger:static_cast<NSInteger>(self.hasShortDiscriminator) forKey:MTRSetupPayloadCodingKeyHasShortDiscriminator];
     [coder encodeObject:self.discriminator forKey:MTRSetupPayloadCodingKeyDiscriminator];
     [coder encodeObject:self.setUpPINCode forKey:MTRSetupPayloadCodingKeySetupPINCode];
     [coder encodeObject:self.serialNumber forKey:MTRSetupPayloadCodingKeySerialNumber];
@@ -141,8 +174,10 @@ static NSString * const MTRSetupPayloadCodingKeySerialNumber = @"MTRSP.ck.serial
     NSNumber * version = [decoder decodeObjectOfClass:[NSNumber class] forKey:MTRSetupPayloadCodingKeyVersion];
     NSNumber * vendorID = [decoder decodeObjectOfClass:[NSNumber class] forKey:MTRSetupPayloadCodingKeyVendorID];
     NSNumber * productID = [decoder decodeObjectOfClass:[NSNumber class] forKey:MTRSetupPayloadCodingKeyProductID];
-    NSUInteger commissioningFlow = [decoder decodeIntegerForKey:MTRSetupPayloadCodingKeyCommissioningFlow];
-    NSUInteger rendezvousInformation = [decoder decodeIntegerForKey:MTRSetupPayloadCodingKeyRendezvousFlags];
+    NSInteger commissioningFlow = [decoder decodeIntegerForKey:MTRSetupPayloadCodingKeyCommissioningFlow];
+    NSNumber * rendezvousInformation = [decoder decodeObjectOfClass:[NSNumber class]
+                                                             forKey:MTRSetupPayloadCodingKeyRendezvousFlags];
+    NSInteger hasShortDiscriminator = [decoder decodeIntegerForKey:MTRSetupPayloadCodingKeyHasShortDiscriminator];
     NSNumber * discriminator = [decoder decodeObjectOfClass:[NSNumber class] forKey:MTRSetupPayloadCodingKeyDiscriminator];
     NSNumber * setUpPINCode = [decoder decodeObjectOfClass:[NSNumber class] forKey:MTRSetupPayloadCodingKeySetupPINCode];
     NSString * serialNumber = [decoder decodeObjectOfClass:[NSString class] forKey:MTRSetupPayloadCodingKeySerialNumber];
@@ -151,8 +186,9 @@ static NSString * const MTRSetupPayloadCodingKeySerialNumber = @"MTRSP.ck.serial
     payload.version = version;
     payload.vendorID = vendorID;
     payload.productID = productID;
-    payload.commissioningFlow = (MTRCommissioningFlow) commissioningFlow;
-    payload.rendezvousInformation = (MTRRendezvousInformationFlags) rendezvousInformation;
+    payload.commissioningFlow = static_cast<MTRCommissioningFlow>(commissioningFlow);
+    payload.rendezvousInformation = rendezvousInformation;
+    payload.hasShortDiscriminator = static_cast<BOOL>(hasShortDiscriminator);
     payload.discriminator = discriminator;
     payload.setUpPINCode = setUpPINCode;
     payload.serialNumber = serialNumber;

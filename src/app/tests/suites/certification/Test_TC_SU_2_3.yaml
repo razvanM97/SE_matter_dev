@@ -16,6 +16,9 @@
 name:
     3.3.1.[TC-SU-2.3]Transfer of Software Update images between DUT and TH/OTA-P
 
+PICS:
+    - MCORE.OTA.Requestor
+
 config:
     nodeId: 0x12344321
     cluster: "Basic"
@@ -40,10 +43,9 @@ tests:
       disabled: true
 
     - label:
-          'IF DUT sends a QueryImage command to the TH/OTA-P. TH/OTA-P sends a
-          QueryImageResponse back to DUT. QueryStatus is set to
-          "UpdateAvailable". Set ImageURI to the location where the image is
-          located.'
+          "DUT sends a QueryImage command to the TH/OTA-P. TH/OTA-P sends a
+          QueryImageResponse back to DUT. QueryStatus is set to UpdateAvailable.
+          Set ImageURI to the location where the image is located."
       verification: |
           "Run the OTA Provider App using the command:
 
@@ -60,10 +62,9 @@ tests:
       disabled: true
 
     - label:
-          'DUT sends a QueryImage command to the TH/OTA-P. TH/OTA-P sends a
-          QueryImageResponse back to DUT. QueryStatus is set to
-          "UpdateAvailable". Set ImageURI with the https url of the software
-          image.'
+          "DUT sends a QueryImage command to the TH/OTA-P. TH/OTA-P sends a
+          QueryImageResponse back to DUT. QueryStatus is set to UpdateAvailable.
+          Set ImageURI with the https url of the software image."
       PICS: MCORE.OTA.HTTPS
       verification: |
           Out of scope for V1.0
@@ -111,6 +112,9 @@ tests:
           [1651259701990] [18726:35135506] CHIP: [DMG]         SuppressResponse = true,
           [1651259701990] [18726:35135506] CHIP: [DMG]         InteractionModelRevision = 1
           [1651259701990] [18726:35135506] CHIP: [DMG] }
+          [1653645452.044092][15281:15286] CHIP:TOO: Endpoint: 0 Cluster: 0x0000_002A Attribute 0x0000_0002 DataVersion: 1306504521
+          [1653645452.044186][15281:15286] CHIP:TOO:   UpdateState: 1
+
 
           Relaunch the OTA Provider App and initiate another query
           chip-tool otasoftwareupdaterequestor announce-ota-provider 0xDEADBEEF 0 0 0 0x1234567890 0

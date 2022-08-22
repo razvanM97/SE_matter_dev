@@ -24,6 +24,9 @@ import argparse
 import subprocess
 import cryptography.x509
 from types import SimpleNamespace
+import enum
+from bitarray import bitarray
+from bitarray.util import ba2int
 
 if os.getenv('IDF_PATH'):
     sys.path.insert(0, os.path.join(os.getenv('IDF_PATH'),
@@ -39,6 +42,11 @@ INVALID_PASSCODES = [00000000, 11111111, 22222222, 33333333, 44444444, 55555555,
                      66666666, 77777777, 88888888, 99999999, 12345678, 87654321]
 
 TOOLS = {}
+
+
+FACTORY_PARTITION_CSV = 'nvs_partition.csv'
+FACTORY_PARTITION_BIN = 'factory_partition.bin'
+NVS_KEY_PARTITION_BIN = 'nvs_key_partition.bin'
 
 
 FACTORY_DATA = {
@@ -136,8 +144,84 @@ FACTORY_DATA = {
         'type': 'data',
         'encoding': 'hex2bin',
         'value': None,
-    }
+    },
+    # DeviceInfoProvider
+    'cal-types': {
+        'type': 'data',
+        'encoding': 'u32',
+        'value': None,
+    },
+    'locale-sz': {
+        'type': 'data',
+        'encoding': 'u32',
+        'value': None,
+    },
+
+    # Other device info provider keys are dynamically generated
+    # in the respective functions.
 }
+
+
+class CalendarTypes(enum.Enum):
+    Buddhist = 0
+    Chinese = 1
+    Coptic = 2
+    Ethiopian = 3
+    Gregorian = 4
+    Hebrew = 5
+    Indian = 6
+    Islamic = 7
+    Japanese = 8
+    Korean = 9
+    Persian = 10
+    Taiwanese = 11
+
+
+# Supported Calendar types is stored as a bit array in one uint32_t.
+def calendar_types_to_uint32(calendar_types):
+    result = bitarray(32, endian='little')
+    result.setall(0)
+    for calendar_type in calendar_types:
+        try:
+            result[CalendarTypes[calendar_type].value] = 1
+        except KeyError:
+            logging.error('Unknown calendar type: %s', calendar_type)
+            logging.error('Supported calendar types: %s', ', '.join(CalendarTypes.__members__))
+            sys.exit(1)
+    return ba2int(result)
+
+
+def ishex(s):
+    try:
+        n = int(s, 16)
+        return True
+    except ValueError:
+        return False
+
+# get_fixed_label_dict() converts the list of strings to per endpoint dictionaries.
+# example input  : ['0/orientation/up', '1/orientation/down', '2/orientation/down']
+# example outout : {'0': [{'orientation': 'up'}], '1': [{'orientation': 'down'}], '2': [{'orientation': 'down'}]}
+
+
+def get_fixed_label_dict(fixed_labels):
+    fl_dict = {}
+    for fl in fixed_labels:
+        _l = fl.split('/')
+
+        if len(_l) != 3:
+            logging.error('Invalid fixed label: %s', fl)
+            sys.exit(1)
+
+        if not (ishex(_l[0]) and (len(_l[1]) > 0 and len(_l[1]) < 16) and (len(_l[2]) > 0 and len(_l[2]) < 16)):
+            logging.error('Invalid fixed label: %s', fl)
+            sys.exit(1)
+
+        if _l[0] not in fl_dict.keys():
+            fl_dict[_l[0]] = list()
+
+        fl_dict[_l[0]].append({_l[1]: _l[2]})
+
+    return fl_dict
 
 
 def check_tools_exists():
@@ -228,6 +312,52 @@ def populate_factory_data(args, spake2p_params):
     if (args.hw_ver_str is not None):
         FACTORY_DATA['hw-ver-str']['value'] = args.hw_ver_str
 
+    if (args.calendar_types is not None):
+        FACTORY_DATA['cal-types']['value'] = calendar_types_to_uint32(args.calendar_types)
+
+    # Supported locale is stored as multiple entries, key format: "locale/<index>, example key: "locale/0"
+    if (args.locales is not None):
+        FACTORY_DATA['locale-sz']['value'] = len(args.locales)
+
+        for i in range(len(args.locales)):
+            _locale = {
+                'type': 'data',
+                'encoding': 'string',
+                'value': args.locales[i]
+            }
+            FACTORY_DATA.update({'locale/{:x}'.format(i): _locale})
+
+    # Each endpoint can contains the fixed lables
+    #  - fl-sz/<index>     : number of fixed labels for the endpoint
+    #  - fl-k/<ep>/<index> : fixed label key for the endpoint and index
+    #  - fl-v/<ep>/<index> : fixed label value for the endpoint and index
+    if (args.fixed_labels is not None):
+        dict = get_fixed_label_dict(args.fixed_labels)
+        for key in dict.keys():
+            _sz = {
+                'type': 'data',
+                'encoding': 'u32',
+                'value': len(dict[key])
+            }
+            FACTORY_DATA.update({'fl-sz/{:x}'.format(int(key)): _sz})
+
+            for i in range(len(dict[key])):
+                entry = dict[key][i]
+
+                _label_key = {
+                    'type': 'data',
+                    'encoding': 'string',
+                    'value': list(entry.keys())[0]
+                }
+                _label_value = {
+                    'type': 'data',
+                    'encoding': 'string',
+                    'value': list(entry.values())[0]
+                }
+
+                FACTORY_DATA.update({'fl-k/{:x}/{:x}'.format(int(key), i): _label_key})
+                FACTORY_DATA.update({'fl-v/{:x}/{:x}'.format(int(key), i): _label_value})
+
 
 def gen_raw_ec_keypair_from_der(key_file, pubkey_raw_file, privkey_raw_file):
     with open(key_file, 'rb') as f:
@@ -238,7 +368,8 @@ def gen_raw_ec_keypair_from_der(key_file, pubkey_raw_file, privkey_raw_file):
 
     # WARNING: Below line assumes that the DAC private key is not protected by a password,
     #          please be careful and use the password-protected key if reusing this code
-    key_der = cryptography.hazmat.primitives.serialization.load_der_private_key(key_data, None)
+    key_der = cryptography.hazmat.primitives.serialization.load_der_private_key(
+        key_data, None, cryptography.hazmat.backends.default_backend())
 
     private_number_val = key_der.private_numbers().private_value
     with open(privkey_raw_file, 'wb') as f:
@@ -262,28 +393,39 @@ def generate_nvs_bin(args):
             continue
         csv_content += f"{k},{v['type']},{v['encoding']},{v['value']}\n"
 
-    with open('nvs_partition.csv', 'w') as f:
+    with open(FACTORY_PARTITION_CSV, 'w') as f:
         f.write(csv_content)
 
-    nvs_args = SimpleNamespace(input='nvs_partition.csv',
-                               output='partition.bin',
-                               size=hex(args.size),
-                               outdir=os.getcwd(),
-                               version=2)
+    if args.encrypt:
+        nvs_args = SimpleNamespace(version=2,
+                                   keygen=True,
+                                   keyfile=NVS_KEY_PARTITION_BIN,
+                                   inputkey=None,
+                                   outdir=os.getcwd(),
+                                   input=FACTORY_PARTITION_CSV,
+                                   output=FACTORY_PARTITION_BIN,
+                                   size=hex(args.size))
+        nvs_partition_gen.encrypt(nvs_args)
+    else:
+        nvs_args = SimpleNamespace(input=FACTORY_PARTITION_CSV,
+                                   output=FACTORY_PARTITION_BIN,
+                                   size=hex(args.size),
+                                   outdir=os.getcwd(),
+                                   version=2)
+        nvs_partition_gen.generate(nvs_args)
 
-    nvs_partition_gen.generate(nvs_args)
 
-
-def print_flashing_help():
-    logging.info('To flash the generated partition.bin, run the following command:')
-    logging.info('==============================================================')
-    logging.info('esptool.py -p <port> write_flash <addr> partition.bin')
-    logging.info('==============================================================')
-    logging.info('default \"nvs\" partition addr is 0x9000')
+def print_flashing_help(encrypt):
+    logging.info('Run below command to flash {}'.format(FACTORY_PARTITION_BIN))
+    logging.info('esptool.py -p (PORT) write_flash (FACTORY_PARTITION_ADDR) {}'.format(os.path.join(os.getcwd(), FACTORY_PARTITION_BIN)))
+    if (encrypt):
+        logging.info('Run below command to flash {}'.format(NVS_KEY_PARTITION_BIN))
+        logging.info('esptool.py -p (PORT) write_flash --encrypt (NVS_KEY_PARTITION_ADDR) {}'.format(
+            os.path.join(os.getcwd(), 'keys', NVS_KEY_PARTITION_BIN)))
 
 
 def clean_up():
-    os.remove('nvs_partition.csv')
+    os.remove(FACTORY_PARTITION_CSV)
     os.remove(FACTORY_DATA['dac-pub-key']['value'])
     os.remove(FACTORY_DATA['dac-key']['value'])
 
@@ -321,8 +463,18 @@ def main():
     parser.add_argument('--unique-id', type=str, required=False,
                         help='128-bit unique identifier, provide 32-byte hex string, e.g. "1234567890abcdef1234567890abcdef"')
 
+    # These will be used by DeviceInfoProvider
+    parser.add_argument('--calendar-types', type=str, nargs='+', required=False,
+                        help='List of supported calendar types.\nSupported Calendar Types: Buddhist, Chinese, Coptic, Ethiopian, Gregorian, Hebrew, Indian, Islamic, Japanese, Korean, Persian, Taiwanese')
+    parser.add_argument('--locales', type=str, nargs='+', required=False,
+                        help='List of supported locales, Language Tag as defined by BCP47, eg. en-US en-GB')
+    parser.add_argument('--fixed-labels', type=str, nargs='+', required=False,
+                        help='List of fixed labels, eg: "0/orientation/up" "1/orientation/down" "2/orientation/down"')
+
     parser.add_argument('-s', '--size', type=any_base_int, required=False, default=0x6000,
                         help='The size of the partition.bin, default: 0x6000')
+    parser.add_argument('-e', '--encrypt', action='store_true', required=False,
+                        help='Encrypt the factory parititon NVS binary')
 
     args = parser.parse_args()
     validate_args(args)
@@ -331,7 +483,7 @@ def main():
     populate_factory_data(args, spake2p_params)
     gen_raw_ec_keypair_from_der(args.dac_key, FACTORY_DATA['dac-pub-key']['value'], FACTORY_DATA['dac-key']['value'])
     generate_nvs_bin(args)
-    print_flashing_help()
+    print_flashing_help(args.encrypt)
     clean_up()
 
 

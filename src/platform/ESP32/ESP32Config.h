@@ -41,6 +41,7 @@ class ESP32Config
 {
 public:
     struct Key;
+    class KeyAllocator;
 
     // Maximum length of an NVS key name, as specified in the ESP-IDF documentation.
     static constexpr size_t kMaxConfigKeyNameLength = 15;
@@ -82,6 +83,8 @@ public:
     static const Key kConfigKey_VendorName;
     static const Key kConfigKey_ProductId;
     static const Key kConfigKey_ProductName;
+    static const Key kConfigKey_SupportedCalTypes;
+    static const Key kConfigKey_SupportedLocaleSize;
 
     // CHIP Counter keys
     static const Key kCounterKey_RebootCount;
@@ -92,8 +95,11 @@ public:
     static CHIP_ERROR ReadConfigValue(Key key, bool & val);
     static CHIP_ERROR ReadConfigValue(Key key, uint32_t & val);
     static CHIP_ERROR ReadConfigValue(Key key, uint64_t & val);
+
+    // If buf is NULL then outLen is set to the required length to fit the string/blob
     static CHIP_ERROR ReadConfigValueStr(Key key, char * buf, size_t bufSize, size_t & outLen);
     static CHIP_ERROR ReadConfigValueBin(Key key, uint8_t * buf, size_t bufSize, size_t & outLen);
+
     static CHIP_ERROR WriteConfigValue(Key key, bool val);
     static CHIP_ERROR WriteConfigValue(Key key, uint32_t val);
     static CHIP_ERROR WriteConfigValue(Key key, uint64_t val);
@@ -136,6 +142,31 @@ inline bool ESP32Config::Key::operator==(const Key & other) const
 {
     return strcmp(Namespace, other.Namespace) == 0 && strcmp(Name, other.Name) == 0;
 }
+
+class ESP32Config::KeyAllocator
+{
+public:
+    static CHIP_ERROR Locale(char * key, size_t size, uint16_t index)
+    {
+        VerifyOrReturnError(key, CHIP_ERROR_INVALID_ARGUMENT);
+        return snprintf(key, size, "locale/%x", index) > 0 ? CHIP_NO_ERROR : CHIP_ERROR_INTERNAL;
+    }
+    static CHIP_ERROR FixedLabelCount(char * key, size_t size, uint16_t endpoint)
+    {
+        VerifyOrReturnError(key, CHIP_ERROR_INVALID_ARGUMENT);
+        return snprintf(key, size, "fl-sz/%x", endpoint) > 0 ? CHIP_NO_ERROR : CHIP_ERROR_INTERNAL;
+    }
+    static CHIP_ERROR FixedLabelKey(char * key, size_t size, uint16_t endpoint, uint16_t index)
+    {
+        VerifyOrReturnError(key, CHIP_ERROR_INVALID_ARGUMENT);
+        return snprintf(key, size, "fl-k/%x/%x", endpoint, index) > 0 ? CHIP_NO_ERROR : CHIP_ERROR_INTERNAL;
+    }
+    static CHIP_ERROR FixedLabelValue(char * key, size_t size, uint16_t endpoint, uint16_t index)
+    {
+        VerifyOrReturnError(key, CHIP_ERROR_INVALID_ARGUMENT);
+        return snprintf(key, size, "fl-v/%x/%x", endpoint, index) > 0 ? CHIP_NO_ERROR : CHIP_ERROR_INTERNAL;
+    }
+};
 
 } // namespace Internal
 } // namespace DeviceLayer

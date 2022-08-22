@@ -41,10 +41,9 @@ COPY --from=crosscompile /opt/ubuntu-21.04-aarch64-sysroot /opt/ubuntu-21.04-aar
 
 COPY --from=ameba /opt/ameba /opt/ameba
 
-COPY --from=k32w /opt/sdk/sdks /opt/sdk/sdks
+COPY --from=k32w /opt/sdk /opt/k32w_sdk
 
 COPY --from=imx /opt/fsl-imx-xwayland /opt/fsl-imx-xwayland
-COPY --from=imx /opt/fsl-imx-wayland /opt/fsl-imx-wayland
 
 COPY --from=ti /opt/ti/sysconfig_1.11.0 /opt/ti/sysconfig_1.11.0
 
@@ -67,6 +66,11 @@ RUN set -x \
     && rm -rf /var/lib/apt/lists/* \
     && : # last line
 
+# Required for the Bouffalolab platform
+RUN set -x \
+    && pip3 install bflb-iot-tool \
+    && : # last line
+
 ENV AMEBA_PATH=/opt/ameba/ambd_sdk_with_chip_non_NDA
 ENV ANDROID_HOME=/opt/android/sdk
 ENV ANDROID_NDK_HOME=/opt/android/android-ndk-r21b
@@ -76,7 +80,7 @@ ENV IDF_PATH=/opt/espressif/esp-idf/
 ENV IDF_TOOLS_PATH=/opt/espressif/tools
 ENV IMX_SDK_ROOT=/opt/fsl-imx-xwayland/5.10-hardknott/
 ENV NRF5_TOOLS_ROOT=/opt/NordicSemiconductor/nRF5_tools
-ENV NXP_K32W061_SDK_ROOT=/opt/sdk/sdks
+ENV NXP_K32W0_SDK_ROOT=/opt/k32w_sdk
 ENV OPENOCD_PATH=/opt/openocd/
 ENV PW_ENVIRONMENT_ROOT=/home/vscode/pigweed/env
 ENV QEMU_ESP32=/opt/espressif/qemu/xtensa-softmmu/qemu-system-xtensa

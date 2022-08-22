@@ -40,6 +40,7 @@
 #include <setup_payload/QRCodeSetupPayloadGenerator.h>
 #include <setup_payload/SetupPayload.h>
 
+#include <DeviceInfoProviderImpl.h>
 #include <app/clusters/network-commissioning/network-commissioning.h>
 #include <platform/P6/NetworkCommissioningDriver.h>
 
@@ -50,9 +51,7 @@
 #include <app/clusters/ota-requestor/DefaultOTARequestorDriver.h>
 #include <app/clusters/ota-requestor/DefaultOTARequestorStorage.h>
 #include <platform/P6/OTAImageProcessorImpl.h>
-extern "C" {
-#include "cy_smif_psoc6.h"
-}
+
 using chip::BDXDownloader;
 using chip::CharSpan;
 using chip::DefaultOTARequestor;
@@ -60,7 +59,7 @@ using chip::FabricIndex;
 using chip::GetRequestorInstance;
 using chip::NodeId;
 using chip::OTADownloader;
-using chip::OTAImageProcessorImpl;
+using chip::DeviceLayer::OTAImageProcessorImpl;
 using chip::System::Layer;
 
 using namespace ::chip;
@@ -73,12 +72,14 @@ using namespace ::chip::System;
 #define APP_EVENT_QUEUE_SIZE 10
 #define APP_TASK_STACK_SIZE (4096)
 #define APP_WAIT_LOOP 1000
+#define FACTORY_RESET_CANCEL_WINDOW_TIMEOUT 5000
 
 LEDWidget sStatusLED;
 LEDWidget sLightLED;
 LEDWidget sClusterLED;
 
 namespace {
+TimerHandle_t sFunctionTimer; // FreeRTOS app sw timer.
 
 TaskHandle_t sAppTaskHandle;
 QueueHandle_t sAppEventQueue;
@@ -106,6 +107,7 @@ using namespace ::chip::DeviceLayer;
 using namespace ::chip::System;
 
 AppTask AppTask::sAppTask;
+static chip::DeviceLayer::DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 
 namespace {
 app::Clusters::NetworkCommissioning::Instance
@@ -129,6 +131,9 @@ static void InitServer(intptr_t context)
 
     // We only have network commissioning on endpoint 0.
     emberAfEndpointEnableDisable(kNetworkCommissioningEndpointSecondary, false);
+
+    gExampleDeviceInfoProvider.SetStorageDelegate(&Server::GetInstance().GetPersistentStorage());
+    chip::DeviceLayer::SetDeviceInfoProvider(&gExampleDeviceInfoProvider);
 
     // Initialize device attestation config
     SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
@@ -181,6 +186,18 @@ CHIP_ERROR AppTask::Init()
     // Initialise WSTK buttons PB0 and PB1 (including debounce).
     ButtonHandler::Init();
 
+    // Create FreeRTOS sw timer for Function Selection.
+    sFunctionTimer = xTimerCreate("FnTmr",          // Just a text name, not used by the RTOS kernel
+                                  1,                // == default timer period (mS)
+                                  false,            // no timer reload (==one-shot)
+                                  (void *) this,    // init timer id = app task obj context
+                                  TimerEventHandler // timer callback handler
+    );
+    if (sFunctionTimer == NULL)
+    {
+        P6_LOG("funct timer create failed");
+        appError(APP_ERROR_CREATE_TIMER_FAILED);
+    }
     NetWorkCommissioningInstInit();
     P6_LOG("Current Software Version: %s", CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION_STRING);
 
@@ -231,7 +248,7 @@ void AppTask::LightActionEventHandler(AppEvent * aEvent)
 
 void AppTask::ButtonEventHandler(uint8_t btnIdx, uint8_t btnAction)
 {
-    if (btnIdx != APP_LIGHT_BUTTON_IDX)
+    if (btnIdx != APP_LIGHT_BUTTON_IDX && btnIdx != APP_FUNCTION_BUTTON_IDX)
     {
         return;
     }
@@ -241,11 +258,106 @@ void AppTask::ButtonEventHandler(uint8_t btnIdx, uint8_t btnAction)
     button_event.ButtonEvent.ButtonIdx = btnIdx;
     button_event.ButtonEvent.Action    = btnAction;
 
-    if ((btnIdx == APP_LIGHT_BUTTON_IDX) && (btnAction == APP_BUTTON_RELEASED))
+    if (btnIdx == APP_LIGHT_BUTTON_IDX)
     {
         button_event.Handler = LightActionEventHandler;
         sAppTask.PostEvent(&button_event);
     }
+    else if (btnIdx == APP_FUNCTION_BUTTON_IDX)
+    {
+        button_event.Handler = FunctionHandler;
+        sAppTask.PostEvent(&button_event);
+    }
+}
+
+void AppTask::TimerEventHandler(TimerHandle_t timer)
+{
+    AppEvent event;
+    event.Type               = AppEvent::kEventType_Timer;
+    event.TimerEvent.Context = (void *) timer;
+    event.Handler            = FunctionTimerEventHandler;
+    sAppTask.PostEvent(&event);
+}
+
+void AppTask::FunctionTimerEventHandler(AppEvent * event)
+{
+    if (event->Type != AppEvent::kEventType_Timer)
+    {
+        return;
+    }
+
+    if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)
+    {
+        // Actually trigger Factory Reset
+        sAppTask.mFunction = Function::kNoneSelected;
+        chip::Server::GetInstance().ScheduleFactoryReset();
+    }
+}
+
+void AppTask::FunctionHandler(AppEvent * event)
+{
+    if (event->ButtonEvent.Action == APP_BUTTON_PRESSED)
+    {
+        if (!sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kNoneSelected)
+        {
+            P6_LOG("Factory Reset Triggered. Press button again within %us to cancel.", FACTORY_RESET_CANCEL_WINDOW_TIMEOUT / 1000);
+            // Start timer for FACTORY_RESET_CANCEL_WINDOW_TIMEOUT to allow user to
+            // cancel, if required.
+            sAppTask.StartTimer(FACTORY_RESET_CANCEL_WINDOW_TIMEOUT);
+
+            sAppTask.mFunction = Function::kFactoryReset;
+
+            // Turn off all LEDs before starting blink to make sure blink is
+            // co-ordinated.
+            sStatusLED.Set(false);
+            sLightLED.Set(false);
+
+            sStatusLED.Blink(500);
+            sLightLED.Blink(500);
+        }
+        else if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)
+        {
+
+            sAppTask.CancelTimer();
+
+            // Change the function to none selected since factory reset has been
+            // canceled.
+            sAppTask.mFunction = Function::kNoneSelected;
+
+            P6_LOG("Factory Reset has been Canceled");
+        }
+    }
+}
+
+void AppTask::CancelTimer()
+{
+    if (xTimerStop(sFunctionTimer, 0) == pdFAIL)
+    {
+        P6_LOG("app timer stop() failed");
+        appError(APP_ERROR_STOP_TIMER_FAILED);
+    }
+
+    mFunctionTimerActive = false;
+}
+
+void AppTask::StartTimer(uint32_t aTimeoutInMs)
+{
+    if (xTimerIsTimerActive(sFunctionTimer))
+    {
+        P6_LOG("app timer already started!");
+        CancelTimer();
+    }
+
+    // timer is not active, change its period to required value (== restart).
+    // FreeRTOS- Block for a maximum of 100 ticks if the change period command
+    // cannot immediately be sent to the timer command queue.
+    if (xTimerChangePeriod(sFunctionTimer, aTimeoutInMs / portTICK_PERIOD_MS, 100) != pdPASS)
+    {
+        P6_LOG("app timer start() failed");
+        appError(APP_ERROR_START_TIMER_FAILED);
+    }
+
+    mFunctionTimerActive = true;
 }
 
 void AppTask::PostEvent(const AppEvent * aEvent)
@@ -314,35 +426,16 @@ bool lowPowerClusterSleep()
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
 void AppTask::InitOTARequestor()
 {
-    CHIP_ERROR err = CHIP_NO_ERROR;
     SetRequestorInstance(&gRequestorCore);
+    ConfigurationMgr().StoreSoftwareVersion(CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION);
     gRequestorStorage.Init(chip::Server::GetInstance().GetPersistentStorage());
     gRequestorCore.Init(chip::Server::GetInstance(), gRequestorStorage, gRequestorUser, gDownloader);
     gImageProcessor.SetOTADownloader(&gDownloader);
     gDownloader.SetImageProcessorDelegate(&gImageProcessor);
+
     gRequestorUser.Init(&gRequestorCore, &gImageProcessor);
 
-    uint32_t savedSoftwareVersion;
-    err = ConfigurationMgr().GetSoftwareVersion(savedSoftwareVersion);
-    if (err != CHIP_NO_ERROR)
-    {
-        P6_LOG("Can't get saved software version");
-        appError(err);
-    }
-
-    if (savedSoftwareVersion != CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION)
-    {
-        ConfigurationMgr().StoreSoftwareVersion(CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION);
-
-        P6_LOG("Confirming update to version: %u", CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION);
-        chip::OTARequestorInterface * requestor = chip::GetRequestorInstance();
-        if (requestor != nullptr)
-        {
-            requestor->NotifyUpdateApplied();
-        }
-    }
-
     P6_LOG("Current Software Version: %u", CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION);
-    P6_LOG("Current Firmware Version String: %s", CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION_STRING);
+    P6_LOG("Current Software Version String: %s", CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION_STRING);
 }
 #endif

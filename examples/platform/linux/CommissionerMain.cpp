@@ -233,8 +233,9 @@ public:
 
 private:
 #if CHIP_DEVICE_CONFIG_APP_PLATFORM_ENABLED
-    static void OnDeviceConnectedFn(void * context, chip::OperationalDeviceProxy * device);
-    static void OnDeviceConnectionFailureFn(void * context, PeerId peerId, CHIP_ERROR error);
+    static void OnDeviceConnectedFn(void * context, chip::Messaging::ExchangeManager & exchangeMgr,
+                                    chip::SessionHandle & sessionHandle);
+    static void OnDeviceConnectionFailureFn(void * context, const ScopedNodeId & peerId, CHIP_ERROR error);
 
     chip::Callback::Callback<chip::OnDeviceConnected> mOnDeviceConnectedCallback;
     chip::Callback::Callback<chip::OnDeviceConnectionFailure> mOnDeviceConnectionFailureCallback;
@@ -253,6 +254,9 @@ void PairingCommand::OnStatusUpdate(DevicePairingDelegate::Status status)
         break;
     case DevicePairingDelegate::Status::SecurePairingFailed:
         ChipLogError(AppServer, "Secure Pairing Failed");
+        break;
+    case DevicePairingDelegate::Status::SecurePairingDiscoveringMoreDevices:
+        ChipLogProgress(AppServer, "Secure Pairing Discovering More Device");
         break;
     }
 }
@@ -308,20 +312,10 @@ void PairingCommand::OnCommissioningComplete(NodeId nodeId, CHIP_ERROR err)
 
 #if CHIP_DEVICE_CONFIG_APP_PLATFORM_ENABLED
 
-void PairingCommand::OnDeviceConnectedFn(void * context, chip::OperationalDeviceProxy * device)
+void PairingCommand::OnDeviceConnectedFn(void * context, Messaging::ExchangeManager & exchangeMgr, SessionHandle & sessionHandle)
 {
     ChipLogProgress(Controller, "OnDeviceConnectedFn");
     CommissionerDiscoveryController * cdc = GetCommissionerDiscoveryController();
-
-    if (device == nullptr)
-    {
-        ChipLogProgress(AppServer, "No OperationalDeviceProxy returned from OnDeviceConnectedFn");
-        if (cdc != nullptr)
-        {
-            cdc->CommissioningFailed(CHIP_ERROR_INCORRECT_STATE);
-        }
-        return;
-    }
 
     if (cdc != nullptr)
     {
@@ -329,11 +323,11 @@ void PairingCommand::OnDeviceConnectedFn(void * context, chip::OperationalDevice
         uint16_t productId = gAutoCommissioner.GetCommissioningParameters().GetRemoteProductId().Value();
         ChipLogProgress(Support, " ----- AutoCommissioner -- Commissionee vendorId=0x%04X productId=0x%04X", vendorId, productId);
 
-        cdc->CommissioningSucceeded(vendorId, productId, gRemoteId, device);
+        cdc->CommissioningSucceeded(vendorId, productId, gRemoteId, exchangeMgr, sessionHandle);
     }
 }
 
-void PairingCommand::OnDeviceConnectionFailureFn(void * context, PeerId peerId, CHIP_ERROR err)
+void PairingCommand::OnDeviceConnectionFailureFn(void * context, const ScopedNodeId & peerId, CHIP_ERROR err)
 {
     ChipLogProgress(Controller, "OnDeviceConnectionFailureFn - attempt to get OperationalDeviceProxy failed");
     CommissionerDiscoveryController * cdc = GetCommissionerDiscoveryController();

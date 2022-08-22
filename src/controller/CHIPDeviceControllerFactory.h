@@ -60,10 +60,26 @@ struct SetupParams
     ByteSpan controllerICAC;
     ByteSpan controllerRCAC;
 
-    chip::VendorId controllerVendorId;
+    //
+    // This must be set to a valid, operational VendorId value associated with
+    // the controller/commissioner.
+    //
+    chip::VendorId controllerVendorId = VendorId::Unspecified;
 
     // The Device Pairing Delegated used to initialize a Commissioner
     DevicePairingDelegate * pairingDelegate = nullptr;
+
+    /**
+     * Controls whether we permit multiple DeviceController instances to exist
+     * on the same logical fabric (identified by the tuple of the fabric's
+     * root public key + fabric id).
+     *
+     * Each controller instance will be associated with its own FabricIndex.
+     * This pivots the FabricTable to tracking identities instead of fabrics,
+     * represented by FabricInfo instances that can have colliding logical fabrics.
+     *
+     */
+    bool permitMultiControllerFabrics = false;
 
     //
     // Controls enabling server cluster interactions on a controller. This in turn

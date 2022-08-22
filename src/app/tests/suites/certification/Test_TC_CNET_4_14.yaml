@@ -14,8 +14,11 @@
 # Auto-generated scripts for harness use only, please review before automation. The endpoints and cluster names are currently set to default
 
 name:
-    11.4.14. [TC-CNET-4.14] [Thread] Verification for ReorderNetwork command
+    12.4.12. [TC-CNET-4.14] [Thread] Verification for ReorderNetwork command
     [DUT-Server]
+
+PICS:
+    - CNET.S.F01
 
 config:
     nodeId: 0x12344321
@@ -23,23 +26,193 @@ config:
     endpoint: 0
 
 tests:
-    - label: "TH sends ArmFailSafe command to the DUT"
+    - label:
+          "TH sends  ArmFailSafe  command to the  DUT
+          with  ExpiryLengthSeco  nds set to 900"
       verification: |
-          The test case is not verifiable. As MaxNetworks value is 1 but expected is 4
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
           ( Pre-Condition)
       disabled: true
 
     - label:
-          "TH sends ReorderNetwork Command to the DUT with the following
-          arguments: NetworkID argument value as 'Userth_op1' NetworkIndex
-          argument value as 'Userth_netidx2' Breadcrumb argument value as 1"
+          "TH reads Networks attribute from the DUT and saves the number of
+          entries as NumNetworks"
+      PICS: CNET.S.A0001
       verification: |
-          The test case is not verifiable. As MaxNetworks value is 1 but expected is 4
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
           ( Pre-Condition)
       disabled: true
 
-    - label: "TH reads Networks attribute list from the DUT"
+    - label:
+          "TH calculates the  number of  remaining  network slots
+          as  MaxNetworksVal  ue -  NumNetworks  and saves
+          as  RemainingNetwor  kSlots"
       verification: |
-          The test case is not verifiable. As MaxNetworks value is 1 but expected is 4
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH calculates the  midpoint of the  network list
+          as  floor((MaxNetwor  ksValue + 1)/2)  and saves as  Midpoint"
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH sends ArmFailSafe command to the DUT with the ExpiryLengthSeco nds
+          field set to 900"
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH sends AddOrUpdateThre adNetwork command to the DUT. This step
+          should be repeated RemainingNetwor kSlots times using DIFFERENT
+          OperationalDatase t values and Breadcrumb set to 1. Note that these
+          credentials are NOT required to be connectable."
+      PICS: CNET.S.C02.Rsp && CNET.S.C05.Tx
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH reads  Networks  attribute from the  DUT and saves the  list
+          as  OriginalNetworkL  ist"
+      PICS: CNET.S.A0001
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH sends  ReorderNetwo  rk Command  to the DUT  with
+          the  following  fields:  1. NetworkID  is the  extended  PAN ID
+          of  PIXIT.CNET  .THREAD_1  ST_OPERA  TIONALDA  TASET  2.  NetworkIn  dex
+          is  MaxNetwo  rksValue  3.  Breadcrum  b is 2"
+      PICS: CNET.S.C08.Rsp && CNET.S.C05.Tx
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH reads Breadcumb attribute from the General Commissioning Cluster"
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH sends  ReorderNetwo  rk Command  to the DUT  with
+          the  following  fields:  1. NetworkID  is a  NetworkID  value
+          NOT  present in  OriginalNe  tworkList  2.  NetworkIn  dex
+          is  Midpoint  3.  Breadcrum  b is 2"
+      PICS: CNET.S.C08.Rsp && CNET.S.C05.Tx
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH reads Breadcumb attribute from the General Commissioning Cluster"
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH sends  ReorderNetwo  rk Command  to the DUT  with
+          the  following  fields:  1. NetworkID  is the  extended  PAN ID
+          of  PIXIT.CNET  .THREAD_1  ST_OPERA  TIONALDA  TASET  2.  NetworkIn  dex
+          is  Midpoint  3.  Breadcrum  b is 2"
+      PICS: CNET.S.C08.Rsp && CNET.S.C05.Tx
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH reads  Breadcumb  attribute from
+          the  General  Commissioning  Cluster"
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label: "TH reads  Networks  attribute list from  the DUT"
+      PICS: CNET.S.A0001
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH sends  ArmFailSafe  command to the  DUT
+          with  ExpiryLengthSeco  nds set to 0"
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label: "TH reads  Networks  attribute list from  the DUT"
+      PICS: CNET.S.A0001
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH sends ArmFailSafe command to the DUT with ExpiryLengthSeco nds set
+          to 900"
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH sends  AddOrUpdateThre  adNetwork  command to the  DUT. This
+          step  should be  repeated  RemainingNetwor  kSlots times
+          using  DIFFERENT  OperationalDatase  t values and  Breadcrumb set
+          to  1. Note that these  credentials are  NOT required to  be
+          connectable"
+      PICS: CNET.S.C02.Rsp && CNET.S.C05.Tx
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH sends  ReorderNetwo  rk Command  to the DUT  with
+          the  following  fields:  1. NetworkID  is the  extended  PAN ID
+          of  PIXIT.CNET  .THREAD_1  ST_OPERA  TIONALDA  TASET  2.  NetworkIn  dex
+          is  Midpoint  3.  Breadcrum  b is 2"
+      PICS: CNET.S.C08.Rsp && CNET.S.C05.Tx
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label: "TH sends the CommissioningCo mplete command to the DUT"
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label:
+          "TH sends  ArmFailSafe  command to the  DUT
+          with  ExpiryLengthSeco  nds set to 0"
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
+          ( Pre-Condition)
+      disabled: true
+
+    - label: "TH reads  Networks  attribute list from  the DUT"
+      PICS: CNET.S.A0001
+      verification: |
+          The test case is not verifiable in RPI platform. As MaxNetworks value is 1 but expected is 4
           ( Pre-Condition)
       disabled: true
